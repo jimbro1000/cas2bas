@@ -1,3 +1,12 @@
+Version 1.0.1
+26th June 2020
+
+* Add build pipeline to verify the development branch
+
+Authored by Julian Brown
+
+-----------------------------------------------------------------------------------
+
 Version 1.0.0
 26th June 2020
 
