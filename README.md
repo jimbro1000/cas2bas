@@ -11,10 +11,9 @@ will work for everything given the potential abuses of the file format
 ### How do I get set up? ###
 
 * Python interpreter (almost any version will do)
-* PIP
+* PIP (only if you need to run the tests)
 * Some suitable BASIC CAS files
 * Clone the repository to your local computer
-* Install libraries from pip using ```pip install -r requirements.txt```
 
 ## Instructions ##
 
@@ -27,6 +26,8 @@ If there are any format errors in the CAS file the script will exit with an
 error code and description
 
 ### Running Tests ###
+
+Install libraries from pip using ```pip install -r requirements.txt```
 
 Unit tests are composed in pytest, to run the test suite use ```pytest``` from the
 project root
