@@ -1,6 +1,7 @@
 import sys
 
 import Cas_Format
+import Dragon_Tokens
 
 
 def usage():
@@ -18,8 +19,12 @@ class Main(object):
         if len(sys.argv) != 2:
             usage()
             return
-        self.input = sys.argv[1]
-        formatter = Cas_Format.CasFormat(self.input)
+        filename = sys.argv[1]
+        tokeniser = Dragon_Tokens.DragonToken()
+        sourceFile = open(filename, "rb")
+        filedata = sourceFile.read()
+        sourceFile.close()
+        formatter = Cas_Format.CasFormat(filedata, tokeniser)
         result = formatter.process_header()
         if result == 0:
             result = formatter.process_file()

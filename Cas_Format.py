@@ -1,5 +1,3 @@
-import Dragon_Tokens
-
 PENDING = 0
 EXPECTING_LINE_ADDRESS_HIGH = 1
 EXPECTING_LINE_ADDRESS_LOW = 2
@@ -33,13 +31,10 @@ class CasFormat(object):
     current_line = ""
     listing = []
 
-    def __init__(self, filename):
+    def __init__(self, filedata, tokeniser):
         self.state = PENDING
-        self.tokeniser = Dragon_Tokens.DragonToken()
-        self.filename = filename
-        self.file = open(filename, "rb")
-        self.data = self.file.read()
-        self.file.close()
+        self.tokeniser = tokeniser
+        self.data = filedata
 
     def next_byte(self):
         """Provides the next byte from the loaded byte array.
