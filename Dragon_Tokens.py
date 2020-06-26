@@ -1,3 +1,7 @@
+NORMAL = 0
+EXTENDED = 1
+
+
 class DragonToken(object):
     token_dictionary = {
         0x80: "FOR",
@@ -118,15 +122,15 @@ class DragonToken(object):
     }
 
     def __init__(self):
-        self.state = 0
+        self.state = NORMAL
 
     def convert(self, byte):
-        if self.state == 1:
+        if self.state == EXTENDED:
             function = self.extended_token_dictionary.get(byte, "invalid extended token")
-            self.state = 0
+            self.state = NORMAL
             return function
         if byte == 255:
-            self.state = 1
+            self.state = EXTENDED
             return ""
         if byte < 128:
             return chr(byte)
