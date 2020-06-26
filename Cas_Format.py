@@ -5,36 +5,35 @@ EXPECTING_LINE_NUMBER_HIGH = 3
 EXPECTING_LINE_NUMBER_LOW = 4
 LINE_DATA = 5
 FAILED = -1
+LEADER = 0x55
+SYNC = 0x3C
+NAME_FILE_BLOCK = 0x00
+DATA_BLOCK = 0x01
+END_OF_FILE_BLOCK = 0xFF
+BASIC_FILE_IDENTIFIER = 0x00
+DATA_FILE_IDENTIFIER = 0x01
+BINARY_FILE_IDENTIFIER = 0x02
+ASCII_FILE_FLAG = 0xFF
+BINARY_FILE_FLAG = 0x00
+CONTINUOUS_FILE = 0x00
 
 
 class CasFormat(object):
     """Processes a file stream of byte data according to the CAS format for BASIC source code."""
-    leader = 0x55
-    sync = 0x3C
-    name_file_block = 0x00
-    data_block = 0x01
-    end_of_file_block = 0xFF
-    basic_file_identifier = 0x00
-    data_file_identifier = 0x01
-    binary_file_identifier = 0x02
-    ascii_file_flag = 0xFF
-    binary_file_flag = 0x00
-    continuous_file = 0x00
-    state = -1
-    byte_index = 0
-    file_type = -1
-    file_name = ""
-    exec_address = 0
-    load_address = 0
-    next_line = 0
-    line_number = 0
-    current_line = ""
-    listing = []
 
     def __init__(self, filedata, tokeniser):
         self.state = PENDING
         self.tokeniser = tokeniser
         self.data = filedata
+        self.state = -1
+        self.byte_index = 0
+        self.file_name = ""
+        self.current_line = ""
+        self.listing = []
+        self.line_number = 0
+        self.next_line = 0
+        self.exec_address = 0
+        self.load_address = 0
 
     def next_byte(self):
         """Provides the next byte from the loaded byte array.
@@ -50,13 +49,13 @@ class CasFormat(object):
     def process_header(self):
         """Processes the file header to verify file type and find file data start point."""
         head = self.next_byte()
-        while head == self.leader:
+        while head == LEADER:
             head = self.next_byte()
-        if head != self.sync:
+        if head != SYNC:
             print("unknown file type, invalid sync byte: " + str(head))
             return -1
         head = self.next_byte()
-        if head != self.name_file_block:
+        if head != NAME_FILE_BLOCK:
             print("illegal file type")
             return -1
         self.next_byte()
@@ -71,17 +70,17 @@ class CasFormat(object):
             head = self.next_byte()
             name_index += 1
         # file id  byte
-        if head != self.basic_file_identifier:
+        if head != BASIC_FILE_IDENTIFIER:
             print("not a basic listing")
             return -1
         head = self.next_byte()
         # ascii flag
-        if head != self.ascii_file_flag and head != self.binary_file_flag:
+        if head != ASCII_FILE_FLAG and head != BINARY_FILE_FLAG:
             print("not a valid byte format - must be ascii or binary")
             return -1
         head = self.next_byte()
         # gap flag
-        if head != self.continuous_file:
+        if head != CONTINUOUS_FILE:
             print("not a continuous file")
             return -1
         head = self.next_byte()
@@ -103,13 +102,13 @@ class CasFormat(object):
         """Processes the file body to extract the token stream.
         File is in blocks so operates as a block iterator with the content being processed in a slim state machine."""
         head = self.next_byte()
-        while head == self.leader:
+        while head == LEADER:
             head = self.next_byte()
-        if head != self.sync:
+        if head != SYNC:
             print("unknown file type, invalid sync byte: " + str(head))
             return -1
         head = self.next_byte()
-        while head == self.data_block:
+        while head == DATA_BLOCK:
             head = self.next_byte()
             length = head
             head = self.next_byte()
@@ -120,19 +119,19 @@ class CasFormat(object):
             # skip checksum byte
             head = self.next_byte()
             # process two leaders
-            if head != self.leader:
+            if head != LEADER:
                 print("invalid block leader")
                 return -1
             head = self.next_byte()
-            if head != self.leader:
+            if head != LEADER:
                 print("invalid block leader")
                 return -1
             head = self.next_byte()
-            if head != self.sync:
+            if head != SYNC:
                 print("unknown file type")
                 return -1
             head = self.next_byte()
-        if head != self.end_of_file_block:
+        if head != END_OF_FILE_BLOCK:
             print("invalid end of file block")
             return -1
         self.state = 100
