@@ -3,6 +3,7 @@ EXTENDED = 1
 
 
 class DragonToken(object):
+    """Converts byte codes into tokens, or more accurately detokenises a byte stream one byte at a time."""
     token_dictionary = {
         0x80: "FOR",
         0x81: "GO",
@@ -125,6 +126,8 @@ class DragonToken(object):
         self.state = NORMAL
 
     def convert(self, byte):
+        """Translates a byte to a string. Ascii characters are literal, values over 127 are tokens or token sequences.
+        Not all token values are valid."""
         if self.state == EXTENDED:
             function = self.extended_token_dictionary.get(byte, "invalid extended token")
             self.state = NORMAL
