@@ -6,6 +6,7 @@ import Dragon_Tokens
 
 def usage():
     print("Dragon CAS format to BASIC listing")
+    print("Version 1.0.0")
     print("Usage:")
     print("cas2bas [filename]")
 
