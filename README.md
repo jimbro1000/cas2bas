@@ -11,7 +11,10 @@ will work for everything given the potential abuses of the file format
 ### How do I get set up? ###
 
 * Python interpreter (almost any version will do)
+* PIP
 * Some suitable BASIC CAS files
+* Clone the repository to your local computer
+* Install libraries from pip using ```pip install -r requirements.txt```
 
 ## Instructions ##
 
