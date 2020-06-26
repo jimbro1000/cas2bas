@@ -23,6 +23,11 @@ The output will be a formatted text listing of the contained BASIC code
 If there are any format errors in the CAS file the script will exit with an
 error code and description
 
+### Running Tests ###
+
+Unit tests are composed in pytest, to run the test suite use ```pytest``` from the
+project root
+
 ## Compatibility ##
 
 The tokens used are the standard Microsoft Extended Color Basic tokens and
@@ -35,4 +40,5 @@ assumption has the potential to cause issues
 Many commercial packages, while written in basic, used a memory dump to 
 achieve an autorun of BASIC code. If you want a listing of such a file you
 will need to load it as normal, perform a soft reset and then save the 
-code again as a BASIC file 
+code again as a BASIC file
+ 
