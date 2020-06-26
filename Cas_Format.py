@@ -1,7 +1,16 @@
 import Dragon_Tokens
 
+PENDING = 0
+EXPECTING_LINE_ADDRESS_HIGH = 1
+EXPECTING_LINE_ADDRESS_LOW = 2
+EXPECTING_LINE_NUMBER_HIGH = 3
+EXPECTING_LINE_NUMBER_LOW = 4
+LINE_DATA = 5
+FAILED = -1
+
 
 class CasFormat(object):
+    """Processes a file stream of byte data according to the CAS format for BASIC source code."""
     leader = 0x55
     sync = 0x3C
     name_file_block = 0x00
@@ -25,7 +34,7 @@ class CasFormat(object):
     listing = []
 
     def __init__(self, filename):
-        self.state = 0
+        self.state = PENDING
         self.tokeniser = Dragon_Tokens.DragonToken()
         self.filename = filename
         self.file = open(filename, "rb")
@@ -33,15 +42,18 @@ class CasFormat(object):
         self.file.close()
 
     def next_byte(self):
+        """Provides the next byte from the loaded byte array.
+        This is a forward only operation."""
         if self.byte_index < len(self.data):
             value = self.data[self.byte_index]
             self.byte_index += 1
             return value
         else:
             print("file length exceeded (" + str(self.byte_index) + " of " + str(len(self.data)) + ")")
-            return 0
+            return -1
 
     def process_header(self):
+        """Processes the file header to verify file type and find file data start point."""
         head = self.next_byte()
         while head == self.leader:
             head = self.next_byte()
@@ -63,7 +75,6 @@ class CasFormat(object):
                 self.file_name += chr(head)
             head = self.next_byte()
             name_index += 1
-        # head = self.next_byte()
         # file id  byte
         if head != self.basic_file_identifier:
             print("not a basic listing")
@@ -90,10 +101,12 @@ class CasFormat(object):
         self.load_address = self.load_address * 256 + head
         self.next_byte()
         # this byte is unidentified
-        self.state = 1
+        self.state = EXPECTING_LINE_ADDRESS_HIGH
         return 0
 
     def process_file(self):
+        """Processes the file body to extract the token stream.
+        File is in blocks so operates as a block iterator with the content being processed in a slim state machine."""
         head = self.next_byte()
         while head == self.leader:
             head = self.next_byte()
@@ -131,48 +144,45 @@ class CasFormat(object):
         return self.generate_final_listing()
 
     def build_listing(self, next_byte):
-        # state 1 find high byte of next line address
+        """Turns block contents into a string formatted, de-tokenised list"""
         def next_line_high():
             self.next_line = next_byte * 256
-            self.state = 2
+            self.state = EXPECTING_LINE_ADDRESS_LOW
 
-        # state 2 find low byte of next line address
         def next_line_low():
             self.next_line += next_byte
-            self.state = 3
+            self.state = EXPECTING_LINE_NUMBER_HIGH
 
-        # state 3 find high byte of line number
         def line_number_high():
             self.line_number = next_byte * 256
-            self.state = 4
+            self.state = EXPECTING_LINE_NUMBER_LOW
 
-        # state 4 find low byte of line number
         def line_number_low():
             self.line_number += next_byte
             self.current_line = str(self.line_number) + " "
-            self.state = 5
+            self.state = LINE_DATA
 
-        # state 5 append to line
         def process_byte():
             if next_byte == 0:
                 self.current_line += chr(10) + chr(13)
                 self.listing.append(self.current_line)
                 self.current_line = ""
-                self.state = 1
+                self.state = EXPECTING_LINE_ADDRESS_HIGH
             else:
                 self.current_line += self.tokeniser.convert(next_byte)
 
-        if self.state == 1:
+        if self.state == EXPECTING_LINE_ADDRESS_HIGH:
             next_line_high()
-        elif self.state == 2:
+        elif self.state == EXPECTING_LINE_ADDRESS_LOW:
             next_line_low()
-        elif self.state == 3:
+        elif self.state == EXPECTING_LINE_NUMBER_HIGH:
             line_number_high()
-        elif self.state == 4:
+        elif self.state == EXPECTING_LINE_NUMBER_LOW:
             line_number_low()
-        elif self.state == 5:
+        elif self.state == LINE_DATA:
             process_byte()
 
     def generate_final_listing(self):
+        """Turns the list of lines into a single string."""
         result = ""
         return result.join(self.listing)
