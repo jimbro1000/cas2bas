@@ -25,6 +25,9 @@ The output will be a formatted text listing of the contained BASIC code
 If there are any format errors in the CAS file the script will exit with an
 error code and description
 
+Optionally you can provide a `-dd` or `--dragondos` option after the filename to use 
+the DragonDos extended BASIC tokens
+
 ### Running Tests ###
 
 Install libraries from pip using ```pip install -r requirements.txt```
