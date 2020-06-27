@@ -1,6 +1,7 @@
 import sys
 
 import Cas_Format
+import Coco_Tokens
 import Dragon_Tokens
 
 
@@ -25,12 +26,20 @@ class Main(object):
             return
         filename = sys.argv[1]
         if len(sys.argv) > 2:
-            if sys.argv[2] == "-dd" or sys.argv == "--dragondos":
+            if sys.argv[2] == "-dd" or sys.argv[2] == "--dragondos":
                 self.mode = 1
-        if self.mode == 0:
-            tokeniser = Dragon_Tokens.DragonToken()
-        else:
+            if sys.argv[2] == "-cc" or sys.argv[2] == "--coco":
+                self.mode = 2
+            if sys.argv[2] == "-rd" or sys.argv[2] == "--rsdos":
+                self.mode = 3
+        if self.mode == 1:
             tokeniser = Dragon_Tokens.DragonDosToken()
+        elif self.mode == 2:
+            tokeniser = Coco_Tokens.CoCoToken()
+        elif self.mode == 3:
+            tokeniser = Coco_Tokens.RsDosToken()
+        else:
+            tokeniser = Dragon_Tokens.DragonToken()
         sourceFile = open(filename, "rb")
         filedata = sourceFile.read()
         sourceFile.close()

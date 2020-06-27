@@ -152,7 +152,7 @@ class DragonToken(object):
             return "invalid keyword token"
 
 
-class DragonDosToken(object):
+class DragonDosToken(DragonToken):
     dos_keyword_token_dictionary = {
         0xce: "AUTO",
         0xcf: "BACKUP",
@@ -193,13 +193,10 @@ class DragonDosToken(object):
     }
 
     def __init__(self):
-        self.tokens = DragonToken()
-        self.tokens.keyword_token_dictionary = {**self.tokens.keyword_token_dictionary,
-                                                **self.dos_keyword_token_dictionary}
-        self.tokens.function_token_dictionary = {**self.tokens.function_token_dictionary,
-                                                 **self.dos_function_token_dictionary}
-        self.tokens.max_keyword = MAXIMUM_DOS_KEYWORD
-        self.tokens.max_function = MAXIMUM_DOS_FUNCTION
-
-    def convert(self, byte):
-        return self.tokens.convert(byte)
+        super().__init__()
+        self.keyword_token_dictionary = {**self.keyword_token_dictionary,
+                                         **self.dos_keyword_token_dictionary}
+        self.function_token_dictionary = {**self.function_token_dictionary,
+                                          **self.dos_function_token_dictionary}
+        self.max_keyword = MAXIMUM_DOS_KEYWORD
+        self.max_function = MAXIMUM_DOS_FUNCTION
