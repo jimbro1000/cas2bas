@@ -1,3 +1,14 @@
+Version 1.1.0
+27th June 2020
+
+* Add optional DragonDos tokens
+* Add optional CoCo tokens
+* Add optional RsDos (and CoCo) tokens
+
+Authored by Julian Brown
+
+-----------------------------------------------------------------------------------
+
 Version 1.0.2
 27th June 2020
 

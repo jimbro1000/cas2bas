@@ -138,7 +138,7 @@ def test_given_a_byte_array_with_no_leaders_between_data_blocks_returns_an_error
 
 def test_given_a_byte_array_without_an_end_of_file_block_returns_an_error():
     stream = [LEADER, SYNC, NAME_FILE_BLOCK, 0, 0x41, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, BASIC_FILE_IDENTIFIER,
-              ASCII_FILE_FLAG, CONTINUOUS_FILE, 0, 0, 0, 0, 0, LEADER, LEADER, SYNC, DATA_BLOCK, 6, 0, 0, 0, 0, 0x0A,
+              ASCII_FILE_FLAG, CONTINUOUS_FILE, 0, 0, 0, 0, 0, LEADER, LEADER, SYNC, DATA_BLOCK, 6, 0, 0, 0, 0x0A,
               0x92, 0, 0, LEADER, LEADER, SYNC, NAME_FILE_BLOCK]
     formatter = CasFormat(stream, Dragon_Tokens.DragonToken())
     expected = -1
