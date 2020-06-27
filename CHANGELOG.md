@@ -1,3 +1,12 @@
+Version 1.0.2
+27th June 2020
+
+* Test edge cases in format conversion
+
+Authored by Julian Brown
+
+-----------------------------------------------------------------------------------
+
 Version 1.0.1
 26th June 2020
 

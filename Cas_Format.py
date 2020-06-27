@@ -1,3 +1,5 @@
+import sys
+
 PENDING = 0
 EXPECTING_LINE_ADDRESS_HIGH = 1
 EXPECTING_LINE_ADDRESS_LOW = 2
@@ -44,7 +46,7 @@ class CasFormat(object):
             return value
         else:
             print("file length exceeded (" + str(self.byte_index) + " of " + str(len(self.data)) + ")")
-            return -1
+            sys.exit(-1)
 
     def process_header(self):
         """Processes the file header to verify file type and find file data start point."""
