@@ -1,4 +1,4 @@
-import Dragon_Tokens
+from cas2bas.dragon_tokens import DragonToken
 
 KEYWORD = 0
 FUNCTION = 1
@@ -8,7 +8,7 @@ MAXIMUM_DOS_KEYWORD = 0xe0
 MAXIMUM_DOS_FUNCTION = 0xa6
 
 
-class CoCoToken(Dragon_Tokens.DragonToken):
+class CoCoToken(DragonToken):
     """Converts byte codes into tokens, or more accurately detokenises a byte stream one byte at a time."""
     keyword_token_dictionary = {
         0x80: "FOR",
@@ -131,6 +131,7 @@ class CoCoToken(Dragon_Tokens.DragonToken):
         super().__init__()
         self.max_keyword = MAXIMUM_KEYWORD
         self.max_function = MAXIMUM_FUNCTION
+        self.name = "Coco Tokens"
 
 
 class RsDosToken(CoCoToken):
@@ -172,3 +173,4 @@ class RsDosToken(CoCoToken):
                                           **self.dos_function_token_dictionary}
         self.max_keyword = MAXIMUM_DOS_KEYWORD
         self.max_function = MAXIMUM_DOS_FUNCTION
+        self.name = "Coco Extended RSDOS tokens"

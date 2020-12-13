@@ -1,3 +1,11 @@
+This is a fork I made of [this code](https://bitbucket.org/jimbro1000/cas2bas), written by Julian Brown. If you are him, or know how to get in touch with him, please let me know, I'd like to discuss integrating my changes here upstream.
+
+# Changes from original (which README below refers to)
+
+- Now should be run with an output directory, e.g. `python cas2bas.py input.cas output_dir -rd`. The script will attempt to extract all the basic programs saved in that cassette file.
+- Code should be accessible as a package, and can be installed with [pipx](https://pipxproject.github.io/pipx/) for easy command-line access.
+- Since some programs will fail to load (due to corrupted data), I still wanted to access their names. The script creates `programs.json` in the output directory, which outputs all this info. (Future TODO: code that pulls as much code as possible from these broken programs).
+
 # README #
 
 ### What is this repository for? ###

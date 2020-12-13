@@ -23,12 +23,12 @@ CONTINUOUS_FILE = 0x00
 class CasFormat(object):
     """Processes a file stream of byte data according to the CAS format for BASIC source code."""
 
-    def __init__(self, filedata, tokeniser):
+    def __init__(self, filedata, tokeniser, start_idx =0, verbose=False):
         self.state = PENDING
         self.tokeniser = tokeniser
         self.data = filedata
         self.state = -1
-        self.byte_index = 0
+        self.byte_index = start_idx
         self.file_name = ""
         self.current_line = ""
         self.listing = []
@@ -36,6 +36,7 @@ class CasFormat(object):
         self.next_line = 0
         self.exec_address = 0
         self.load_address = 0
+        self.verbose = verbose
 
     def next_byte(self):
         """Provides the next byte from the loaded byte array.
@@ -51,10 +52,13 @@ class CasFormat(object):
     def process_header(self):
         """Processes the file header to verify file type and find file data start point."""
         head = self.next_byte()
+        leader_length = 0
         while head == LEADER:
+            leader_length += 1
             head = self.next_byte()
         if head != SYNC:
-            print("unknown file type, invalid sync byte: " + str(head))
+            if self.verbose:
+                print("unknown file type, invalid sync byte: " + str(head))
             return -1
         head = self.next_byte()
         if head != NAME_FILE_BLOCK:
@@ -103,6 +107,7 @@ class CasFormat(object):
     def process_file(self):
         """Processes the file body to extract the token stream.
         File is in blocks so operates as a block iterator with the content being processed in a slim state machine."""
+        #self.byte_index = start_idx
         head = self.next_byte()
         while head == LEADER:
             head = self.next_byte()

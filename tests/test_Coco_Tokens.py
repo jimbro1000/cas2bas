@@ -1,15 +1,15 @@
 import pytest
 
-import Coco_Tokens
+from cas2bas import coco_tokens
 
-tokeniser = Coco_Tokens.CoCoToken()
-dos_tokeniser = Coco_Tokens.RsDosToken()
+tokeniser = coco_tokens.CoCoToken()
+dos_tokeniser = coco_tokens.RsDosToken()
 
 
 @pytest.fixture(autouse=True)
 def before_each():
-    tokeniser.state = Coco_Tokens.KEYWORD
-    dos_tokeniser.state = Coco_Tokens.KEYWORD
+    tokeniser.state = coco_tokens.KEYWORD
+    dos_tokeniser.state = coco_tokens.KEYWORD
 
 
 @pytest.mark.parametrize("test_input,expected", [(0x92, "POKE"), (0xaa, "OFF"), (0xcb, "RENUM")])
@@ -23,7 +23,7 @@ def test_when_a_single_byte_value_of_255_is_supplied_no_result_is_returned_and_t
     token_value = 0xFF
     actual = tokeniser.convert(token_value)
     assert actual == expected
-    assert tokeniser.state == Coco_Tokens.FUNCTION
+    assert tokeniser.state == coco_tokens.FUNCTION
 
 
 @pytest.mark.parametrize("test_input,expected", [(0x8d, "JOYSTK"), (0x93, "MEM"), (0x9d, "VARPTR")])
