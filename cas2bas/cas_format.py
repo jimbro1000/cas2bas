@@ -23,7 +23,7 @@ CONTINUOUS_FILE = 0x00
 class CasFormat(object):
     """Processes a file stream of byte data according to the CAS format for BASIC source code."""
 
-    def __init__(self, filedata, tokeniser, start_idx =0, verbose=False):
+    def __init__(self, filedata, tokeniser, start_idx=0, verbose=False):
         self.state = PENDING
         self.tokeniser = tokeniser
         self.data = filedata
@@ -46,7 +46,8 @@ class CasFormat(object):
             self.byte_index += 1
             return value
         else:
-            print("file length exceeded (" + str(self.byte_index) + " of " + str(len(self.data)) + ")")
+            print("file length exceeded (" + str(self.byte_index) +
+                  " of " + str(len(self.data)) + ")")
             sys.exit(-1)
 
     def process_header(self):

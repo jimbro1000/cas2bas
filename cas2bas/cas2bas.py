@@ -18,6 +18,7 @@ def usage():
     print("  -rd --rsdos   : use Coco Rsdos extended BASIC")
     print("  -v  --verbose : print debugging messages")
 
+
 def leader_bytes(filedata, filter=True):
     """
     Get the start index of all strings of leaders in the file
@@ -26,24 +27,24 @@ def leader_bytes(filedata, filter=True):
     are probably just random noise.
 
     `filter` removes all sequences that are less than 128 bytes
-    (http://www.cs.unc.edu/~yakowenk/coco/text/tapeformat.html) 
+    (http://www.cs.unc.edu/~yakowenk/coco/text/tapeformat.html)
     """
     all_leaders = [i for i, val in enumerate(filedata) if val == LEADER]
 
-    diff = [all_leaders[i+1] - all_leaders[i] for i, val in enumerate(all_leaders) if val != all_leaders[-1]] + [0]
-    
+    diff = [all_leaders[i + 1] - all_leaders[i]
+            for i, val in enumerate(all_leaders) if val != all_leaders[-1]] + [0]
+
     start_bytes = []
     seq_lengths = []
     l = 1
     for i, d in zip(all_leaders, diff):
         if d != 1:
-            if not filter or l > 128: 
-                start_bytes.append(i-l+1)
+            if not filter or l > 128:
+                start_bytes.append(i - l + 1)
                 seq_lengths.append(l)
             l = 1
         else:
             l += 1
-
 
     return(start_bytes, seq_lengths)
 
@@ -61,7 +62,7 @@ class Main(object):
             usage()
             return
         filename = sys.argv[1]
-        filename_noext = splitext(basename(filename))[0] # For output files
+        filename_noext = splitext(basename(filename))[0]  # For output files
         output_path = sys.argv[2]
         opts = sys.argv[3:]
         if len(opts) > 0:
@@ -87,18 +88,20 @@ class Main(object):
 
         # Get "LEADER" byte indices
         leader_seq_idx, leader_length = leader_bytes(filedata)
-        
+
         # Listing of programs (including ones that got corrupted)
-        # TODO: Modification (or parameter) of Cas_Format that attempts to recover as much as possible.
-        program_dict = {"program" : [], "byte_index" : [], "success": []} 
-        last_byte = -1 # to be updated in the loop
+        # TODO: Modification (or parameter) of Cas_Format that attempts to
+        # recover as much as possible.
+        program_dict = {"program": [], "byte_index": [], "success": []}
+        last_byte = -1  # to be updated in the loop
 
         # Extract, starting at each place a string of leader bytes starts
         for idx, l in zip(leader_seq_idx, leader_length):
             if idx < last_byte:
                 continue
 
-            formatter = CasFormat(filedata, tokeniser, idx, verbose=self.verbose)
+            formatter = CasFormat(
+                filedata, tokeniser, idx, verbose=self.verbose)
             result = formatter.process_header()
 
             if result == 0:
@@ -112,23 +115,28 @@ class Main(object):
                     with open(output, "w") as f:
                         f.write(result)
                     program_dict['success'].append(1)
-                    print(f"{output} extracted from {filename} using \033[1m{tokeniser.name}\033[0m")
-                    # Save last byte index to prevent trying to read from the middle of this program
+                    print(
+                        f"{output} extracted from {filename} using \033[1m{tokeniser.name}\033[0m")
+                    # Save last byte index to prevent trying to read from the
+                    # middle of this program
                     last_byte = formatter.byte_index
 
                 else:
                     program_dict['success'].append(0)
                     print(f"Unable to write {output}")
             else:
-                print(f"Sequence starting at byte {idx} produced the error above.")
+                print(
+                    f"Sequence starting at byte {idx} produced the error above.")
 
         # Write dict
-        with open(join(output_path,'programs.json'), 'w') as f:
+        with open(join(output_path, 'programs.json'), 'w') as f:
             json.dump(program_dict, f)
+
 
 def main():
     app = Main()
     app.run()
+
 
 if __name__ == "__main__":
     exec()
