@@ -9,18 +9,17 @@ with io.open(os.path.join(CURDIR, "README.md"), "r", encoding="utf-8") as f:
 
 setup(
     name='cas2bas',
-    version='0.1.0',
+    version='1.0.2',
     author='Julian Brown',
-    # author_email='',
+    author_email='julian@the-lair.info',
     packages=['cas2bas'],
-    scripts=[],
     entry_points={
         'console_scripts': [
             'cas2bas = cas2bas.cas2bas:main',
         ]
     },
-    # url='',
-    # license='LICENSE.txt',
+    url='https://github.com/jimbro1000/cas2bas',
+    license='LICENSE.txt',
     description='Quick tool for converting Dragon/Coco CAS format to readable text of basic listing',
     long_description=README,
     install_requires=[
