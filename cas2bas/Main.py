@@ -59,7 +59,7 @@ class Main(object):
         # Process the code
         if header == 0:
             print(f"Located program {formatter.file_name}")
-            result = formatter.process_file()            
+            result = formatter.process_file()
             # Only try to write if string was actually produced
             if isinstance(result, str):
                 with open(output, "w") as f:
@@ -74,9 +74,11 @@ class Main(object):
             print("Processing header failed")
             raise Exception
 
+
 def main():
     app = Main()
     app.run()
+
 
 if __name__ == "__main__":
     main()
