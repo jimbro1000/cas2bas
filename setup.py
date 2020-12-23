@@ -15,7 +15,7 @@ setup(
     packages=['cas2bas'],
     entry_points={
         'console_scripts': [
-            'cas2bas = cas2bas.cas2bas:main',
+            'cas2bas = cas2bas.Main:main',
         ]
     },
     url='https://github.com/jimbro1000/cas2bas',

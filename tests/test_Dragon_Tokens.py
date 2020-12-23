@@ -1,15 +1,15 @@
 import pytest
 
-from cas2bas import dragon_tokens
+from cas2bas import Dragon_Tokens
 
-tokeniser = dragon_tokens.DragonToken()
-dos_tokeniser = dragon_tokens.DragonDosToken()
+tokeniser = Dragon_Tokens.DragonToken()
+dos_tokeniser = Dragon_Tokens.DragonDosToken()
 
 
 @pytest.fixture(autouse=True)
 def before_each():
-    tokeniser.state = dragon_tokens.KEYWORD
-    dos_tokeniser.state = dragon_tokens.KEYWORD
+    tokeniser.state = Dragon_Tokens.KEYWORD
+    dos_tokeniser.state = Dragon_Tokens.KEYWORD
 
 
 @pytest.mark.parametrize("test_input,expected",
@@ -26,7 +26,7 @@ def test_when_a_single_byte_value_of_255_is_supplied_no_result_is_returned_and_t
     token_value = 0xFF
     actual = tokeniser.convert(token_value)
     assert actual == expected
-    assert tokeniser.state == dragon_tokens.FUNCTION
+    assert tokeniser.state == Dragon_Tokens.FUNCTION
 
 
 @pytest.mark.parametrize("test_input,expected",

@@ -1,4 +1,4 @@
-from cas2bas.dragon_tokens import DragonToken
+from cas2bas.Dragon_Tokens import DragonToken
 
 KEYWORD = 0
 FUNCTION = 1
