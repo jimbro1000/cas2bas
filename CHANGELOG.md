@@ -1,5 +1,13 @@
-Version 1.1.0
-27th June 2020
+Version 1.1.1 3rd January 2021
+
+* Migrate implementation to pipx package
+* Minor fixes to documentation
+
+Authored by Daniel Farnand and Julian Brown
+
+-----------------------------------------------------------------------------------
+
+Version 1.1.0 27th June 2020
 
 * Add optional DragonDos tokens
 * Add optional CoCo tokens
@@ -39,7 +47,7 @@ Authored by Julian Brown
 -----------------------------------------------------------------------------------
 
 Initial Version x.x.x   
-26th June 2020  
+26th June 2020
 
 * Read DRAGON format .CAS file from filesystem
 * Detokenise file content
