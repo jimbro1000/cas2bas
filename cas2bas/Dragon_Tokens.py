@@ -130,6 +130,7 @@ class DragonToken(object):
         self.state = KEYWORD
         self.max_keyword = MAXIMUM_KEYWORD
         self.max_function = MAXIMUM_FUNCTION
+        self.name = "Dragon tokens"
 
     def convert(self, byte):
         """Translates a byte to a string. Ascii characters are literal, values over 127 are tokens or token sequences.
@@ -200,3 +201,4 @@ class DragonDosToken(DragonToken):
                                           **self.dos_function_token_dictionary}
         self.max_keyword = MAXIMUM_DOS_KEYWORD
         self.max_function = MAXIMUM_DOS_FUNCTION
+        self.name = "DragonDos extended tokens"

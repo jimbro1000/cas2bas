@@ -45,13 +45,16 @@ class CasFormat(object):
             self.byte_index += 1
             return value
         else:
-            print("file length exceeded (" + str(self.byte_index) + " of " + str(len(self.data)) + ")")
+            print("file length exceeded (" + str(self.byte_index) +
+                  " of " + str(len(self.data)) + ")")
             sys.exit(-1)
 
     def process_header(self):
         """Processes the file header to verify file type and find file data start point."""
         head = self.next_byte()
+        leader_length = 0
         while head == LEADER:
+            leader_length += 1
             head = self.next_byte()
         if head != SYNC:
             print("unknown file type, invalid sync byte: " + str(head))
