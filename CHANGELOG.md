@@ -1,3 +1,9 @@
+Version 2.0.0 Unreleased
+
+* Provide bas2cas command (WIP)
+
+-----------------------------------------------------------------------------------
+
 Version 1.1.1 3rd January 2021
 
 * Migrate implementation to pipx package

@@ -1,6 +1,6 @@
 import pytest
 
-from cas2bas import Coco_Tokens
+from formats import Coco_Tokens
 
 tokeniser = Coco_Tokens.CoCoToken()
 dos_tokeniser = Coco_Tokens.RsDosToken()

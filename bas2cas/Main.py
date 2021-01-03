@@ -1,15 +1,14 @@
 import sys
 
-from formats.Cas_Format import CasFormat
 from formats.Coco_Tokens import CoCoToken, RsDosToken
 from formats.Dragon_Tokens import DragonToken, DragonDosToken
 
 
 def usage():
-    print("Dragon CAS format to BASIC listing")
+    print("Dragon ASCII BASIC listing to CAS format")
     print("Version 2.0.0")
     print("Usage:")
-    print("  cas2bas [input_filename] [output_filename] [options] ")
+    print("  bas2cas [input_filename] [output_filename] [options] ")
     print("Options:")
     print("  -dd --dragondos : use DragonDos extended BASIC")
     print("  -cc --coco      : use Coco BASIC")
@@ -50,27 +49,6 @@ class Main(object):
         # Read file
         with open(filename, "rb") as sourceFile:
             filedata = sourceFile.read()
-        # Look at file header
-        formatter = CasFormat(
-            filedata, tokeniser)
-        header = formatter.process_header()
-        # Process the code
-        if header == 0:
-            print(f"Located program {formatter.file_name}")
-            result = formatter.process_file()
-            # Only try to write if string was actually produced
-            if isinstance(result, str):
-                with open(output, "w") as f:
-                    f.write(result)
-                print(
-                    f"{output} extracted from {filename} using \033[1m{tokeniser.name}\033[0m")
-
-            else:
-                print("Processing file failed")
-                raise Exception
-        else:
-            print("Processing header failed")
-            raise Exception
 
 
 def main():
