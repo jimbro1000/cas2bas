@@ -24,7 +24,7 @@ class Main(object):
         self.mode = 0
         self.verbose = False
 
-    def run(self):
+    def run(self) -> object:
         # Process parameters
         if len(sys.argv) < 3:
             usage()
