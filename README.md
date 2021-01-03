@@ -7,6 +7,11 @@ This project provides a quick (and dirty) method of extracting tokenised BASIC c
 While tested against a variety of files there are no guarantees that it will work for everything given the potential
 abuses of the file format
 
+#### New Features in V2 ####
+
+An experimental version of the code that converts untokenised ASCII text to CAS format is available using the bas2cas
+command
+
 ### How do I get set up? ###
 
 * Python interpreter (almost any version will do)

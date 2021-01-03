@@ -10,13 +10,18 @@ with io.open(os.path.join(CURDIR, "README.md"), "r", encoding="utf-8") as f:
 
 setup(
     name='cas2bas',
-    version='1.1.1',
+    version='2.0.0',
     author='Julian Brown',
     author_email='julian@the-lair.info',
-    packages=['cas2bas'],
+    packages=[
+        'cas2bas',
+        'bas2cas',
+        'formats'
+    ],
     entry_points={
         'console_scripts': [
             'cas2bas = cas2bas.Main:main',
+            'bas2cas = bas2cas.Main:main'
         ]
     },
     url='https://github.com/jimbro1000/cas2bas',

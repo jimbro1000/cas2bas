@@ -1,7 +1,7 @@
 import pytest
 
-from cas2bas import Dragon_Tokens
-from cas2bas.Cas_Format import CasFormat, LEADER, SYNC, NAME_FILE_BLOCK, BASIC_FILE_IDENTIFIER, ASCII_FILE_FLAG, \
+from formats import Dragon_Tokens
+from formats.Cas_Format import CasFormat, LEADER, SYNC, NAME_FILE_BLOCK, BASIC_FILE_IDENTIFIER, ASCII_FILE_FLAG, \
     CONTINUOUS_FILE, DATA_BLOCK, END_OF_FILE_BLOCK, DATA_FILE_IDENTIFIER
 
 

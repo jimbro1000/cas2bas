@@ -1,6 +1,6 @@
 import pytest
 
-from cas2bas import Dragon_Tokens
+from formats import Dragon_Tokens
 
 tokeniser = Dragon_Tokens.DragonToken()
 dos_tokeniser = Dragon_Tokens.DragonDosToken()
