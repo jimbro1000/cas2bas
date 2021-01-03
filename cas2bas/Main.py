@@ -1,21 +1,19 @@
 import sys
-import json
-from os.path import join, splitext, basename
 
-from cas2bas.Cas_Format import CasFormat, LEADER
+from cas2bas.Cas_Format import CasFormat
 from cas2bas.Coco_Tokens import CoCoToken, RsDosToken
 from cas2bas.Dragon_Tokens import DragonToken, DragonDosToken
 
 
 def usage():
     print("Dragon CAS format to BASIC listing")
-    print("Version 1.0.2")
+    print("Version 1.1.1")
     print("Usage:")
     print("  cas2bas [input_filename] [output_filename] [options] ")
     print("Options:")
-    print("  -dd --dos     : use DragonDos extended BASIC")
-    print("  -cc --coco    : use Coco BASIC")
-    print("  -rd --rsdos   : use Coco Rsdos extended BASIC")
+    print("  -dd --dragondos : use DragonDos extended BASIC")
+    print("  -cc --coco      : use Coco BASIC")
+    print("  -rd --rsdos     : use Coco Rsdos extended BASIC")
     print("If none of the options are specified, Dragon tokens will be used.")
 
 
