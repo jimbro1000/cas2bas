@@ -1,6 +1,7 @@
-Version 1.1.0 3rd January 2021
+Version 1.1.1 3rd January 2021
 
 * Migrate implementation to pipx package
+* Minor fixes to documentation
 
 Authored by Daniel Farnand and Julian Brown
 
