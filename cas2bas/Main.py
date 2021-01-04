@@ -45,7 +45,9 @@ class Main(object):
         tokeniser = find_tokeniser(sys.argv[3:])
         self.verbosity = find_verbosity(sys.argv[3:])
         self.report(0, f"Using {tokeniser.name}")
-        formatter = initialise_formatter(self.filename, tokeniser)
+        formatter = initialise_formatter(
+            self.filename, tokeniser, self.verbosity
+        )
         self.process_cas(formatter)
 
     def process_cas(self, formatter):

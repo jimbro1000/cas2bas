@@ -170,7 +170,7 @@ class CasFormat(object):
 
         def process_byte():
             if next_byte == 0:
-                self.current_line += chr(10) + chr(13)
+                self.current_line += chr(13)
                 self.listing.append(self.current_line)
                 self.current_line = ""
                 self.state = EXPECTING_LINE_ADDRESS_HIGH
