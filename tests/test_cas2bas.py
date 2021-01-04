@@ -53,7 +53,7 @@ def test_given_multiple_conflicting_options_returns_the_highest_priority_tokenis
 def test_given_a_valid_filename_initialise_the_formatter(mocker):
     filename = 'source'
     mocker.patch("builtins.open")
-    result = initialise_formatter(filename, DragonToken())
+    result = initialise_formatter(filename, DragonToken(), 1)
     open.assert_called_once_with(filename, 'rb')
     assert isinstance(result.tokeniser, DragonToken)
 
@@ -105,14 +105,14 @@ def test_given_a_valid_file_and_tokeniser_generate_a_listing_file(mocker):
         LEADER,
         SYNC,
         END_OF_FILE_BLOCK]
-    formatter = CasFormat(stream, DragonToken())
+    formatter = CasFormat(stream, DragonToken(), 1)
     subject = Main()
     subject.filename = "testfile"
     subject.output = "textfile"
     subject.process_cas(formatter)
     open.assert_called_once_with("textfile", "w")
     print.assert_any_call("Located program A")
-    print.assert_any_call("textfile extracted from testfile using \033[1mDragon tokens\033[0m")
+    print.assert_any_call("textfile extracted from testfile using \x1b[1mDragon tokens\x1b[0m")
 
 
 @pytest.mark.parametrize("test_input", ["--silent", "-s"])

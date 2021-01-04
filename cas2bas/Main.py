@@ -45,10 +45,10 @@ def find_verbosity(options):
     return result
 
 
-def initialise_formatter(filename, tokeniser):
+def initialise_formatter(filename, tokeniser, verbosity):
     with open(filename, "rb") as sourceFile:
         file_data = sourceFile.read()
-    return CasFormat(file_data, tokeniser)
+    return CasFormat(file_data, tokeniser, verbosity)
 
 
 class Main(object):
@@ -84,7 +84,6 @@ class Main(object):
                     f.write(self.result)
                 self.report(1,
                             f"{self.output} extracted from {self.filename} using \033[1m{formatter.tokeniser.name}\033[0m")
-
             else:
                 self.report(2, "Processing file failed")
                 raise Exception
