@@ -13,15 +13,32 @@ def usage():
     print("Options:")
     print("  -dd --dragondos : use DragonDos extended BASIC")
     print("  -cc --coco      : use Coco BASIC")
-    print("  -rd --rsdos     : use Coco Rsdos extended BASIC")
+    print("  -rd --rsdos     : use Coco RSDos extended BASIC")
     print("If none of the options are specified, Dragon tokens will be used.")
+
+
+def find_tokeniser(options):
+    result = DragonToken()
+    if len(options) > 0:
+        if any([op in ["-dd", "--dragondos"] for op in options]):
+            result = DragonDosToken()
+        elif any([op in ["-cc", "--coco"] for op in options]):
+            result = CoCoToken()
+        elif any([op in ["-rd", "--rsdos"] for op in options]):
+            result = RsDosToken()
+    return result
+
+
+def initialise_formatter(filename, tokeniser):
+    with open(filename, "rb") as sourceFile:
+        file_data = sourceFile.read()
+    return CasFormat(file_data, tokeniser)
 
 
 class Main(object):
 
     def __init__(self):
         self.result = ""
-        self.mode = 0
         self.verbose = False
 
     def run(self) -> object:
@@ -31,28 +48,8 @@ class Main(object):
             return
         filename = sys.argv[1]
         output = sys.argv[2]
-        opts = sys.argv[3:]
-        if len(opts) > 0:
-            if any([op in ["-dd", "--dragondos"] for op in opts]):
-                self.mode = 1
-            elif any([op in ["-cc", "--coco"] for op in opts]):
-                self.mode = 2
-            elif any([op in ["-rd", "--rsdos"] for op in opts]):
-                self.mode = 3
-        if self.mode == 1:
-            tokeniser = DragonDosToken()
-        elif self.mode == 2:
-            tokeniser = CoCoToken()
-        elif self.mode == 3:
-            tokeniser = RsDosToken()
-        else:
-            tokeniser = DragonToken()
-        # Read file
-        with open(filename, "rb") as sourceFile:
-            filedata = sourceFile.read()
-        # Look at file header
-        formatter = CasFormat(
-            filedata, tokeniser)
+        tokeniser = find_tokeniser(sys.argv[3:])
+        formatter = initialise_formatter(filename, tokeniser)
         header = formatter.process_header()
         # Process the code
         if header == 0:
