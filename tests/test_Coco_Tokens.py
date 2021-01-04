@@ -54,3 +54,30 @@ def test_when_a_two_byte_dos_token_is_supplied_return_the_token_function(
     dos_tokeniser.convert(0xFF)
     actual = dos_tokeniser.convert(test_input)
     assert actual == expected
+
+
+@pytest.mark.parametrize("test_input,expected",
+                         [("invalid", (False, "invalid")), ("bad", (False, "bad"))])
+def test_when_an_invalid_string_is_supplied_to_match_return_a_false_string_tuple(
+        test_input,
+        expected):
+    actual = tokeniser.match(test_input)
+    assert actual == expected
+
+
+@pytest.mark.parametrize("test_input,expected",
+                         [("PRINT", (True, 0x87)), ("RENUM", (True, 0xcb))])
+def test_when_a_known_keyword_string_is_supplied_return_a_true_token_tuple(
+        test_input,
+        expected):
+    actual = tokeniser.match(test_input)
+    assert actual == expected
+
+
+@pytest.mark.parametrize("test_input,expected",
+                         [("SGN", (True, 0xff80)), ("STRING$", (True, 0xffa1))])
+def test_when_a_known_function_string_is_supplied_return_a_true_token_tuple(
+        test_input,
+        expected):
+    actual = tokeniser.match(test_input)
+    assert actual == expected

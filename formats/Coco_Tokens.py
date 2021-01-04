@@ -1,4 +1,5 @@
 from formats.Dragon_Tokens import DragonToken
+from formats.Utility import invert_dictionary
 
 KEYWORD = 0
 FUNCTION = 1
@@ -132,6 +133,8 @@ class CoCoToken(DragonToken):
         self.max_keyword = MAXIMUM_KEYWORD
         self.max_function = MAXIMUM_FUNCTION
         self.name = "Coco Tokens"
+        self.keyword_dictionary = invert_dictionary(self.keyword_token_dictionary)
+        self.function_dictionary = invert_dictionary(self.function_token_dictionary)
 
 
 class RsDosToken(CoCoToken):
@@ -174,3 +177,5 @@ class RsDosToken(CoCoToken):
         self.max_keyword = MAXIMUM_DOS_KEYWORD
         self.max_function = MAXIMUM_DOS_FUNCTION
         self.name = "Coco Extended RSDOS tokens"
+        self.keyword_dictionary = invert_dictionary(self.keyword_token_dictionary)
+        self.function_dictionary = invert_dictionary(self.function_token_dictionary)
