@@ -14,7 +14,11 @@ def usage():
     print("  -dd --dragondos : use DragonDos extended BASIC")
     print("  -cc --coco      : use Coco BASIC")
     print("  -rd --rsdos     : use Coco RSDos extended BASIC")
-    print("If none of the options are specified, Dragon tokens will be used.")
+    print("If none of the token options are specified, Dragon tokens will be used.")
+    print("  -s --silent     : suppress all console output")
+    print("  -q --quiet      : only show errors in console")
+    print("  -v --verbose    : show all messages")
+    print("Default messages are informational only")
 
 
 def find_tokeniser(options):
@@ -29,6 +33,18 @@ def find_tokeniser(options):
     return result
 
 
+def find_verbosity(options):
+    result = 1
+    if len(options) > 0:
+        if any([op in ["-s", "--silent"] for op in options]):
+            result = 3
+        if any([op in ["-q", "--quiet"] for op in options]):
+            result = 2
+        if any([op in ["-v", "--verbose"] for op in options]):
+            result = 0
+    return result
+
+
 def initialise_formatter(filename, tokeniser):
     with open(filename, "rb") as sourceFile:
         file_data = sourceFile.read()
@@ -39,35 +55,46 @@ class Main(object):
 
     def __init__(self):
         self.result = ""
-        self.verbose = False
+        self.verbosity = 1
+        self.filename = ""
+        self.output = ""
 
     def run(self) -> object:
         # Process parameters
         if len(sys.argv) < 3:
             usage()
             return
-        filename = sys.argv[1]
-        output = sys.argv[2]
+        self.filename = sys.argv[1]
+        self.output = sys.argv[2]
         tokeniser = find_tokeniser(sys.argv[3:])
-        formatter = initialise_formatter(filename, tokeniser)
+        self.verbosity = find_verbosity(sys.argv[3:])
+        self.report(0, f"Using {tokeniser.name}")
+        formatter = initialise_formatter(self.filename, tokeniser)
+        self.process_cas(formatter)
+
+    def process_cas(self, formatter):
         header = formatter.process_header()
         # Process the code
         if header == 0:
-            print(f"Located program {formatter.file_name}")
-            result = formatter.process_file()
+            self.report(1, f"Located program {formatter.file_name}")
+            self.result = formatter.process_file()
             # Only try to write if string was actually produced
-            if isinstance(result, str):
-                with open(output, "w") as f:
-                    f.write(result)
-                print(
-                    f"{output} extracted from {filename} using \033[1m{tokeniser.name}\033[0m")
+            if isinstance(self.result, str):
+                with open(self.output, "w") as f:
+                    f.write(self.result)
+                self.report(1,
+                            f"{self.output} extracted from {self.filename} using \033[1m{formatter.tokeniser.name}\033[0m")
 
             else:
-                print("Processing file failed")
+                self.report(2, "Processing file failed")
                 raise Exception
         else:
-            print("Processing header failed")
+            self.report(2, "Processing header failed")
             raise Exception
+
+    def report(self, level, message):
+        if level >= self.verbosity:
+            print(message)
 
 
 def main():
