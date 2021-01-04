@@ -21,7 +21,7 @@ def test_when_a_single_byte_token_is_supplied_return_the_token_keyword(
     assert actual == expected
 
 
-def test_when_a_single_byte_value_of_255_is_supplied_no_result_is_returned_and_the_next_byte_is_treated_as_extended():
+def test_given_a_255_byte_set_extended_mode_and_return_none():
     expected = ''
     token_value = 0xFF
     actual = tokeniser.convert(token_value)
@@ -48,14 +48,14 @@ def test_when_an_ascii_value_byte_is_supplied_return_the_equivalent_character(
     assert actual == expected
 
 
-def test_when_an_illegal_single_byte_token_is_supplied_return_an_error_message():
+def test_when_an_illegal_single_byte_token_supplied_return_an_error_message():
     expected = "invalid keyword token"
     token_value = 0xFE
     actual = tokeniser.convert(token_value)
     assert actual == expected
 
 
-def test_when_an_illegal_double_byte_token_is_supplied_return_an_error_message():
+def test_when_an_illegal_double_byte_token_supplied_return_an_error_message():
     expected = "invalid function token"
     token_value = 0xB0
     tokeniser.convert(0xFF)
@@ -64,14 +64,16 @@ def test_when_an_illegal_double_byte_token_is_supplied_return_an_error_message()
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [(0x96, "CLEAR"), (0xCE, "AUTO"), (0xDD, "MERGE"), (0xE7, "SWAP")])
+                         [(0x96, "CLEAR"), (0xCE, "AUTO"),
+                          (0xDD, "MERGE"), (0xE7, "SWAP")])
 def test_when_a_dos_token_is_used_return_a_dos_keyword(test_input, expected):
     actual = dos_tokeniser.convert(test_input)
     assert actual == expected
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [(0x93, "JOYSTK"), (0xA2, "LOF"), (0xA4, "ERL"), (0xA8, "FRE$")])
+                         [(0x93, "JOYSTK"), (0xA2, "LOF"),
+                          (0xA4, "ERL"), (0xA8, "FRE$")])
 def test_when_a_two_byte_dos_token_is_supplied_return_the_token_function(
         test_input,
         expected):
@@ -81,8 +83,9 @@ def test_when_a_two_byte_dos_token_is_supplied_return_the_token_function(
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [("invalid", (False, "invalid")), ("bad", (False, "bad"))])
-def test_when_an_invalid_string_is_supplied_to_match_return_a_false_string_tuple(
+                         [("invalid", (False, "invalid")),
+                          ("bad", (False, "bad"))])
+def test_when_invalid_string_is_supplied_to_match_return_a_false_string_tuple(
         test_input,
         expected):
     actual = tokeniser.match(test_input)
@@ -90,7 +93,8 @@ def test_when_an_invalid_string_is_supplied_to_match_return_a_false_string_tuple
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [("PRINT", (True, 0x87)), ("USING", (True, 0xcd))])
+                         [("PRINT", (True, 0x87)),
+                          ("USING", (True, 0xcd))])
 def test_when_a_known_keyword_string_is_supplied_return_a_true_token_tuple(
         test_input,
         expected):

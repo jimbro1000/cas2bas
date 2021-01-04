@@ -10,7 +10,8 @@ FUNCTION_OFFSET = 0xff00
 
 
 class DragonToken(object):
-    """Converts byte codes into tokens, or more accurately detokenises a byte stream one byte at a time."""
+    """Converts byte codes into tokens, or more accurately detokenises
+    a byte stream one byte at a time."""
     keyword_token_dictionary = {
         0x80: "FOR",
         0x81: "GO",
@@ -134,11 +135,14 @@ class DragonToken(object):
         self.max_keyword = MAXIMUM_KEYWORD
         self.max_function = MAXIMUM_FUNCTION
         self.name = "Dragon tokens"
-        self.keyword_dictionary = invert_dictionary(self.keyword_token_dictionary)
-        self.function_dictionary = invert_dictionary(self.function_token_dictionary)
+        self.keyword_dictionary = invert_dictionary(
+            self.keyword_token_dictionary)
+        self.function_dictionary = invert_dictionary(
+            self.function_token_dictionary)
 
     def convert(self, byte):
-        """Translates a byte to a string. Ascii characters are literal, values over 127 are tokens or token sequences.
+        """Translates a byte to a string. Ascii characters are literal,
+        values over 127 are tokens or token sequences.
         Not all token values are valid."""
         if byte < 128:
             return chr(byte)
@@ -218,5 +222,7 @@ class DragonDosToken(DragonToken):
         self.max_keyword = MAXIMUM_DOS_KEYWORD
         self.max_function = MAXIMUM_DOS_FUNCTION
         self.name = "DragonDos extended tokens"
-        self.keyword_dictionary = invert_dictionary(self.keyword_token_dictionary)
-        self.function_dictionary = invert_dictionary(self.function_token_dictionary)
+        self.keyword_dictionary = invert_dictionary(
+            self.keyword_token_dictionary)
+        self.function_dictionary = invert_dictionary(
+            self.function_token_dictionary)

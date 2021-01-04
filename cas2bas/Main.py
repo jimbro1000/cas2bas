@@ -1,8 +1,8 @@
 import sys
 
 from formats.Cas_Format import CasFormat
-from formats.Coco_Tokens import CoCoToken, RsDosToken
-from formats.Dragon_Tokens import DragonToken, DragonDosToken
+from formats.Tokeniser_Factory import find_tokeniser
+from formats.Utility import find_verbosity
 
 
 def usage():
@@ -14,35 +14,11 @@ def usage():
     print("  -dd --dragondos : use DragonDos extended BASIC")
     print("  -cc --coco      : use Coco BASIC")
     print("  -rd --rsdos     : use Coco RSDos extended BASIC")
-    print("If none of the token options are specified, Dragon tokens will be used.")
+    print("If none of the token options are given, Dragon tokens are used")
     print("  -s --silent     : suppress all console output")
     print("  -q --quiet      : only show errors in console")
     print("  -v --verbose    : show all messages")
     print("Default messages are informational only")
-
-
-def find_tokeniser(options):
-    result = DragonToken()
-    if len(options) > 0:
-        if any([op in ["-dd", "--dragondos"] for op in options]):
-            result = DragonDosToken()
-        elif any([op in ["-cc", "--coco"] for op in options]):
-            result = CoCoToken()
-        elif any([op in ["-rd", "--rsdos"] for op in options]):
-            result = RsDosToken()
-    return result
-
-
-def find_verbosity(options):
-    result = 1
-    if len(options) > 0:
-        if any([op in ["-s", "--silent"] for op in options]):
-            result = 3
-        if any([op in ["-q", "--quiet"] for op in options]):
-            result = 2
-        if any([op in ["-v", "--verbose"] for op in options]):
-            result = 0
-    return result
 
 
 def initialise_formatter(filename, tokeniser, verbosity):
@@ -82,8 +58,11 @@ class Main(object):
             if isinstance(self.result, str):
                 with open(self.output, "w") as f:
                     f.write(self.result)
-                self.report(1,
-                            f"{self.output} extracted from {self.filename} using \033[1m{formatter.tokeniser.name}\033[0m")
+                self.report(
+                    1,
+                    f"{self.output} extracted from {self.filename} \
+using \033[1m{formatter.tokeniser.name}\033[0m"
+                )
             else:
                 self.report(2, "Processing file failed")
                 raise Exception

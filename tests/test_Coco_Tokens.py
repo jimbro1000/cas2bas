@@ -21,7 +21,7 @@ def test_when_a_single_byte_token_is_supplied_return_the_coco_token_keyword(
     assert actual == expected
 
 
-def test_when_a_single_byte_value_of_255_is_supplied_no_result_is_returned_and_the_next_byte_is_treated_as_extended():
+def test_given_a_255_byte_set_extended_mode_and_return_none():
     expected = ''
     token_value = 0xFF
     actual = tokeniser.convert(token_value)
@@ -40,14 +40,16 @@ def test_when_a_two_byte_token_is_supplied_return_the_token_keyword(
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [(0x96, "NEW"), (0xCE, "DIR"), (0xDD, "BACKUP"), (0xE0, "DSKO$")])
+                         [(0x96, "NEW"), (0xCE, "DIR"),
+                          (0xDD, "BACKUP"), (0xE0, "DSKO$")])
 def test_when_a_dos_token_is_used_return_a_dos_keyword(test_input, expected):
     actual = dos_tokeniser.convert(test_input)
     assert actual == expected
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [(0x93, "MEM"), (0xA2, "CVN"), (0xA4, "LOC"), (0xA6, "MKN$")])
+                         [(0x93, "MEM"), (0xA2, "CVN"),
+                          (0xA4, "LOC"), (0xA6, "MKN$")])
 def test_when_a_two_byte_dos_token_is_supplied_return_the_token_function(
         test_input,
         expected):
@@ -57,8 +59,9 @@ def test_when_a_two_byte_dos_token_is_supplied_return_the_token_function(
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [("invalid", (False, "invalid")), ("bad", (False, "bad"))])
-def test_when_an_invalid_string_is_supplied_to_match_return_a_false_string_tuple(
+                         [("invalid", (False, "invalid")),
+                          ("bad", (False, "bad"))])
+def test_when_an_invalid_string_supplied_to_match_return_a_false_string_tuple(
         test_input,
         expected):
     actual = tokeniser.match(test_input)
@@ -75,7 +78,8 @@ def test_when_a_known_keyword_string_is_supplied_return_a_true_token_tuple(
 
 
 @pytest.mark.parametrize("test_input,expected",
-                         [("SGN", (True, 0xff80)), ("STRING$", (True, 0xffa1))])
+                         [("SGN", (True, 0xff80)),
+                          ("STRING$", (True, 0xffa1))])
 def test_when_a_known_function_string_is_supplied_return_a_true_token_tuple(
         test_input,
         expected):

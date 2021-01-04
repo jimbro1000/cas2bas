@@ -26,7 +26,7 @@ setup(
     },
     url='https://github.com/jimbro1000/cas2bas',
     license='LICENSE',
-    description='Quick tool for converting Dragon/Coco CAS format to readable text of basic listing',
+    description='Quick tool for converting Dragon/Coco CAS format',
     long_description=README,
     install_requires=[
         "pytest",

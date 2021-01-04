@@ -10,7 +10,8 @@ MAXIMUM_DOS_FUNCTION = 0xa6
 
 
 class CoCoToken(DragonToken):
-    """Converts byte codes into tokens, or more accurately detokenises a byte stream one byte at a time."""
+    """Converts byte codes into tokens, or more accurately detokenises
+    a byte stream one byte at a time."""
     keyword_token_dictionary = {
         0x80: "FOR",
         0x81: "GO",
@@ -133,8 +134,10 @@ class CoCoToken(DragonToken):
         self.max_keyword = MAXIMUM_KEYWORD
         self.max_function = MAXIMUM_FUNCTION
         self.name = "Coco Tokens"
-        self.keyword_dictionary = invert_dictionary(self.keyword_token_dictionary)
-        self.function_dictionary = invert_dictionary(self.function_token_dictionary)
+        self.keyword_dictionary = invert_dictionary(
+            self.keyword_token_dictionary)
+        self.function_dictionary = invert_dictionary(
+            self.function_token_dictionary)
 
 
 class RsDosToken(CoCoToken):
@@ -177,5 +180,7 @@ class RsDosToken(CoCoToken):
         self.max_keyword = MAXIMUM_DOS_KEYWORD
         self.max_function = MAXIMUM_DOS_FUNCTION
         self.name = "Coco Extended RSDOS tokens"
-        self.keyword_dictionary = invert_dictionary(self.keyword_token_dictionary)
-        self.function_dictionary = invert_dictionary(self.function_token_dictionary)
+        self.keyword_dictionary = invert_dictionary(
+            self.keyword_token_dictionary)
+        self.function_dictionary = invert_dictionary(
+            self.function_token_dictionary)

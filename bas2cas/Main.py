@@ -1,7 +1,7 @@
 import sys
 
-from formats.Coco_Tokens import CoCoToken, RsDosToken
-from formats.Dragon_Tokens import DragonToken, DragonDosToken
+from formats.Tokeniser_Factory import find_tokeniser
+from formats.Utility import find_verbosity
 
 
 def usage():
@@ -13,7 +13,11 @@ def usage():
     print("  -dd --dragondos : use DragonDos extended BASIC")
     print("  -cc --coco      : use Coco BASIC")
     print("  -rd --rsdos     : use Coco Rsdos extended BASIC")
-    print("If none of the options are specified, Dragon tokens will be used.")
+    print("If none of the token options are given, Dragon tokens are used")
+    print("  -s --silent     : suppress all console output")
+    print("  -q --quiet      : only show errors in console")
+    print("  -v --verbose    : show all messages")
+    print("Default messages are informational only")
 
 
 class Main(object):
@@ -21,7 +25,7 @@ class Main(object):
     def __init__(self):
         self.result = ""
         self.mode = 0
-        self.verbose = False
+        self.verbose = 1
 
     def run(self) -> object:
         # Process parameters
@@ -30,22 +34,8 @@ class Main(object):
             return
         filename = sys.argv[1]
         output = sys.argv[2]
-        opts = sys.argv[3:]
-        if len(opts) > 0:
-            if any([op in ["-dd", "--dragondos"] for op in opts]):
-                self.mode = 1
-            elif any([op in ["-cc", "--coco"] for op in opts]):
-                self.mode = 2
-            elif any([op in ["-rd", "--rsdos"] for op in opts]):
-                self.mode = 3
-        if self.mode == 1:
-            tokeniser = DragonDosToken()
-        elif self.mode == 2:
-            tokeniser = CoCoToken()
-        elif self.mode == 3:
-            tokeniser = RsDosToken()
-        else:
-            tokeniser = DragonToken()
+        tokeniser = find_tokeniser(sys.argv[3:])
+        self.verbosity = find_verbosity(sys.argv[3:])
         # Read file
         with open(filename, "rb") as sourceFile:
             filedata = sourceFile.read()
