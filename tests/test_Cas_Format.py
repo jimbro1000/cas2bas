@@ -470,3 +470,15 @@ def test_given_a_byte_array_without_an_end_of_file_block_returns_an_error():
     if header_pass == 0:
         actual = formatter.process_file()
     assert expected == actual
+
+
+def test_build_header_takes_filename_to_return_basic_cas_stream():
+    filename = "SAMPLE"
+    formatter = formats.Cas_Format.CasFormat([], Dragon_Tokens.DragonToken, 1)
+    actual = formatter.build_header(filename)
+    assert isinstance(actual, list)
+    assert len(actual) > 0
+    formatter.data = actual
+    header_pass = formatter.process_header()
+    assert formatter.file_name == filename
+    assert header_pass == 0

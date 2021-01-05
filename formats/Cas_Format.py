@@ -1,5 +1,7 @@
 import sys
 
+from formats.Block_Builder import FileBlock
+
 PENDING = 0
 EXPECTING_LINE_ADDRESS_HIGH = 1
 EXPECTING_LINE_ADDRESS_LOW = 2
@@ -18,6 +20,8 @@ BINARY_FILE_IDENTIFIER = 0x02
 ASCII_FILE_FLAG = 0xFF
 BINARY_FILE_FLAG = 0x00
 CONTINUOUS_FILE = 0x00
+DEFAULT_LEADER_SIZE = 128
+FILENAME_LENGTH = 8
 
 
 class CasFormat(object):
@@ -38,6 +42,7 @@ class CasFormat(object):
         self.exec_address = 0
         self.load_address = 0
         self.verbosity = verbosity
+        self.leader_length = DEFAULT_LEADER_SIZE
 
     def next_byte(self):
         """Provides the next byte from the loaded byte array.
@@ -103,7 +108,7 @@ class CasFormat(object):
         head = self.next_byte()
         self.load_address = self.load_address * 256 + head
         self.next_byte()
-        # this byte is unidentified
+        # this byte is the checksum of the block (bytes+type+length)
         self.state = EXPECTING_LINE_ADDRESS_HIGH
         return 0
 
@@ -196,3 +201,29 @@ class CasFormat(object):
     def report(self, level, message):
         if level >= self.verbosity:
             print(message)
+
+    def build_header(self, filename):
+        result = []
+        filename_list = list(filename)
+        del filename_list[FILENAME_LENGTH:]
+        while len(filename_list) < FILENAME_LENGTH:
+            filename_list.append(" ")
+
+        for x in range(self.leader_length):
+            result.append(LEADER)
+
+        block = FileBlock(NAME_FILE_BLOCK)
+        for x in range(FILENAME_LENGTH):
+            block.append(ord(filename_list[x]))
+        block.append(BASIC_FILE_IDENTIFIER)
+        block.append(BINARY_FILE_FLAG)
+        block.append(CONTINUOUS_FILE)
+        block.append(0)
+        block.append(0)
+        block.append(0x7c)
+        block.append(0xaf)
+        result += block.seal_block()
+
+        for x in range(self.leader_length):
+            result.append(LEADER)
+        return result
