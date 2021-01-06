@@ -20,7 +20,9 @@ BINARY_FILE_IDENTIFIER = 0x02
 ASCII_FILE_FLAG = 0xFF
 BINARY_FILE_FLAG = 0x00
 CONTINUOUS_FILE = 0x00
-DEFAULT_LEADER_SIZE = 128
+DRAGON32_LEADER_SIZE = 128
+DRAGON64_LEADER_SIZE = 256
+DEFAULT_LEADER_SIZE = DRAGON32_LEADER_SIZE
 FILENAME_LENGTH = 8
 
 
@@ -226,4 +228,24 @@ class CasFormat(object):
 
         for x in range(self.leader_length):
             result.append(LEADER)
+        return result
+
+    def build_file(self, filename, data):
+        result = self.build_header(filename)
+        loop = len(data) > 0
+        block = FileBlock(DATA_BLOCK)
+        while loop:
+            if block.capacity() == 0:
+                result += block.seal_block()
+                result.append(LEADER)
+                result.append(LEADER)
+                block = FileBlock(DATA_BLOCK)
+            block.append(data.pop(0))
+            loop = len(data) > 0
+        result += block.seal_block()
+        result.append(LEADER)
+        result.append(LEADER)
+        block = FileBlock(END_OF_FILE_BLOCK)
+        result += block.seal_block()
+        result.append(LEADER)
         return result

@@ -1,7 +1,9 @@
 class FileBlock(object):
+    MAXIMUM_BLOCK_LENGTH = 258
+    IDENTIFIER_LENGTH = 3
 
     def __init__(self, block_type):
-        self.block_type = 0
+        self.block_type = block_type
         self.content = [0x3c, block_type, 1]
 
     def append(self, byte):
@@ -11,7 +13,7 @@ class FileBlock(object):
             exception = ValueError()
             exception.strerror = "non-byte supplied"
             raise exception
-        if len(self.content) < 258:
+        if len(self.content) < self.MAXIMUM_BLOCK_LENGTH:
             self.content.append(byte)
         else:
             exception = ValueError()
@@ -19,13 +21,13 @@ class FileBlock(object):
             raise exception
 
     def capacity(self):
-        return 258 - len(self.content)
+        return self.MAXIMUM_BLOCK_LENGTH - len(self.content)
 
     def seal_block(self):
-        length = len(self.content) - 3
+        length = len(self.content) - self.IDENTIFIER_LENGTH
         checksum = 0
         for x in range(length):
-            checksum += self.content[x + 3]
+            checksum += self.content[x + self.IDENTIFIER_LENGTH]
         checksum += length
         checksum += self.block_type
         self.content[2] = length

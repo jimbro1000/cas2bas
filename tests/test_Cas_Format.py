@@ -474,7 +474,9 @@ def test_given_a_byte_array_without_an_end_of_file_block_returns_an_error():
 
 def test_build_header_takes_filename_to_return_basic_cas_stream():
     filename = "SAMPLE"
-    formatter = formats.Cas_Format.CasFormat([], Dragon_Tokens.DragonToken, 1)
+    formatter = formats.Cas_Format.CasFormat(
+        [], Dragon_Tokens.DragonToken(), 1
+    )
     actual = formatter.build_header(filename)
     assert isinstance(actual, list)
     assert len(actual) > 0
@@ -482,3 +484,22 @@ def test_build_header_takes_filename_to_return_basic_cas_stream():
     header_pass = formatter.process_header()
     assert formatter.file_name == filename
     assert header_pass == 0
+
+
+# integration test for file builder
+def test_build_file_takes_filename_and_data_to_return_cas_stream():
+    filename = "SAMPLE"
+    formatter = formats.Cas_Format.CasFormat(
+        [], Dragon_Tokens.DragonToken(), 1
+    )
+    expected = "10 STOP" + chr(13)
+    data = [0, 0, 0, 0x0A, 0x92, 0]
+    actual = formatter.build_file(filename, data)
+    assert isinstance(actual, list)
+    assert len(actual) == 292
+    formatter.data = actual
+    header_pass = formatter.process_header()
+    assert formatter.file_name == filename
+    assert header_pass == 0
+    rebuild = formatter.process_file()
+    assert expected == rebuild

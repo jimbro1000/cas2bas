@@ -14,7 +14,7 @@ def test_file_block_creates_a_new_minimal_cas_block_byte_array():
 
 def test_block_append_adds_a_byte_to_the_block():
     block = FileBlock(DATA_BLOCK)
-    expected = [0x3c, 0x01, 0x01, 0x01, 0x02]
+    expected = [0x3c, 0x01, 0x01, 0x01, 0x03]
     block.append(0x01)
     actual = block.seal_block()
     assert actual == expected
