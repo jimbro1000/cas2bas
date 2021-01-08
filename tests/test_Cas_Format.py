@@ -45,7 +45,7 @@ def test_given_a_valid_byte_array_returns_a_formatted_string():
     formatter = formats.Cas_Format.CasFormat(
         stream, Dragon_Tokens.DragonToken(), 1
     )
-    expected = "10 STOP" + chr(13)
+    expected = "10 STOP\n"
     header_pass = formatter.process_header()
     actual = ""
     if header_pass == 0:
@@ -194,7 +194,7 @@ def test_given_a_valid_multi_block_byte_array_returns_a_formatted_string():
     formatter = formats.Cas_Format.CasFormat(
         stream, Dragon_Tokens.DragonToken(), 1
     )
-    expected = "10 STOP" + chr(13)
+    expected = "10 STOP\n"
     header_pass = formatter.process_header()
     actual = ""
     if header_pass == 0:
@@ -492,7 +492,7 @@ def test_build_file_takes_filename_and_data_to_return_cas_stream():
     formatter = formats.Cas_Format.CasFormat(
         [], Dragon_Tokens.DragonToken(), 1
     )
-    expected = "10 STOP" + chr(13)
+    expected = "10 STOP\n"
     data = [0, 0, 0, 0x0A, 0x92, 0]
     actual = formatter.build_file(filename, data)
     assert isinstance(actual, list)

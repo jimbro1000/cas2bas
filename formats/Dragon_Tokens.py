@@ -15,6 +15,7 @@ EXPECTING_LITERAL_OR_WHITE_SPACE = 4
 EXPECTING_STRING_LITERAL = 5
 TAB = "\t"
 EOL = "\n"
+CR = "\r"
 
 
 class DragonToken(object):
@@ -141,6 +142,7 @@ class DragonToken(object):
     reserved_literals = [
         ":",
         '"',
+        CR,
         EOL
     ]
 
@@ -265,10 +267,13 @@ class DragonToken(object):
                         statement.append(0)
                         loop = False
                         result = 0
+                    elif token == CR:
+                        next_char = plain_array.pop(0)
                     elif token == ":":
-                        statement.append(token)
+                        statement.append(ord(token))
                         state = EXPECTING_TOKEN
                         next_char = plain_array.pop(0)
+                        token = ""
                     elif token == '"':
                         statement.append(ord(token))
                         state = EXPECTING_STRING_LITERAL
@@ -283,6 +288,8 @@ class DragonToken(object):
                         statement.append(0)
                         loop = False
                         result = -1
+                    elif token == CR:
+                        next_char = plain_array.pop(0)
                     elif token == '"':
                         statement.append(ord(token))
                         state = EXPECTING_LITERAL_OR_WHITE_SPACE
@@ -314,6 +321,7 @@ class DragonToken(object):
         stream = []
         while loop:
             sample, program = extract_line(program)
+            print(sample)
             result, line_number, line_stream = self.parse_line(sample)
             if result == 0:
                 load_address += 4 + len(line_stream)
