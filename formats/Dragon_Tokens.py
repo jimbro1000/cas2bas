@@ -6,11 +6,19 @@ MAXIMUM_KEYWORD = 0xcd
 MAXIMUM_FUNCTION = 0xa1
 MAXIMUM_DOS_KEYWORD = 0xe7
 MAXIMUM_DOS_FUNCTION = 0xa8
+MAXIMUM_TOKEN_LENGTH = 7
 FUNCTION_OFFSET = 0xff00
+EXPECTING_LINE_NUMBER = 1
+EXPECTING_INITIAL_WHITE_SPACE = 2
+EXPECTING_TOKEN = 3
+EXPECTING_LITERAL_OR_WHITE_SPACE = 4
+EXPECTING_STRING_LITERAL = 5
+TAB = chr(8)
+EOL = chr(13)
 
 
 class DragonToken(object):
-    """Converts byte codes into tokens, or more accurately detokenises
+    """Converts byte codes into tokens, or more accurately de-tokenises
     a byte stream one byte at a time."""
     keyword_token_dictionary = {
         0x80: "FOR",
@@ -130,6 +138,12 @@ class DragonToken(object):
         0xa1: "USR"
     }
 
+    reserved_literals = [
+        ":",
+        '"',
+        EOL
+    ]
+
     def __init__(self):
         self.state = KEYWORD
         self.max_keyword = MAXIMUM_KEYWORD
@@ -171,6 +185,108 @@ class DragonToken(object):
             valid = True
             token = FUNCTION_OFFSET + self.function_dictionary.get(sample)
         return valid, token
+
+    def is_reserved(self, sample):
+        result = False
+        reserved = None
+        for item in self.reserved_literals:
+            if item == sample:
+                result = True
+                reserved = item
+        return result, reserved
+
+    def parse_line(self, plain):
+        """ parse_line "assumes" that the plain input is a correctly
+        constructed basic program statement """
+
+        def process_line(char, line_number):
+            if '0' <= char <= '9':
+                line_number += char
+                return 1, line_number
+            return 0, line_number
+
+        def process_white_space(char):
+            if char == " " or char == TAB:
+                return 1
+            else:
+                return 0
+
+        def build_token(char, sample):
+            sample += char
+            valid, test_key = self.match(sample)
+            if valid:
+                return 2, sample, test_key
+            elif len(sample) > MAXIMUM_TOKEN_LENGTH:
+                return 0, sample, None
+            else:
+                return 1, sample, None
+
+        plain_array = list(plain)
+        state = EXPECTING_LINE_NUMBER
+        line = ""
+        statement = []
+        token = ""
+
+        result = 0
+        loop = len(plain_array) > 0
+        next_char = plain_array.pop(0)
+        while loop:
+            if state == EXPECTING_LINE_NUMBER:
+                outcome, line = process_line(next_char, line)
+                if outcome == 0:
+                    state = EXPECTING_INITIAL_WHITE_SPACE
+                else:
+                    next_char = plain_array.pop(0)
+            elif state == EXPECTING_INITIAL_WHITE_SPACE:
+                outcome = process_white_space(next_char)
+                if outcome == 0:
+                    state = EXPECTING_TOKEN
+                else:
+                    next_char = plain_array.pop(0)
+            elif state == EXPECTING_TOKEN:
+                outcome, token, key = build_token(next_char, token)
+                if outcome == 2:
+                    state = EXPECTING_LITERAL_OR_WHITE_SPACE
+                    statement.append(key)
+                    next_char = plain_array.pop(0)
+                elif outcome == 1:
+                    next_char = plain_array.pop(0)
+                else:
+                    loop = False
+                    result = -1
+            elif state == EXPECTING_LITERAL_OR_WHITE_SPACE:
+                reserved, token = self.is_reserved(next_char)
+                if reserved:
+                    if token == EOL:
+                        statement.append(0)
+                        loop = False
+                        result = 0
+                    elif token == ":":
+                        statement.append(token)
+                        state = EXPECTING_TOKEN
+                        next_char = plain_array.pop(0)
+                    elif token == '"':
+                        statement.append(ord(token))
+                        state = EXPECTING_STRING_LITERAL
+                        next_char = plain_array.pop(0)
+                else:
+                    statement.append(ord(next_char))
+                    next_char = plain_array.pop(0)
+            elif state == EXPECTING_STRING_LITERAL:
+                reserved, token = self.is_reserved(next_char)
+                if reserved:
+                    if token == EOL:
+                        statement.append(0)
+                        loop = False
+                        result = -1
+                    elif token == '"':
+                        statement.append(token)
+                        state = EXPECTING_STRING_LITERAL
+                        next_char = plain_array.pop(0)
+                else:
+                    statement.append(ord(next_char))
+                    next_char = plain_array.pop(0)
+        return result, line, statement
 
 
 class DragonDosToken(DragonToken):

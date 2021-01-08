@@ -109,3 +109,23 @@ def test_when_a_known_function_string_is_supplied_return_a_true_token_tuple(
         expected):
     actual = tokeniser.match(test_input)
     assert actual == expected
+
+
+def test_given_a_valid_line_string_build_a_tokenised_string():
+    sample = "10 STOP" + chr(13)
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "10"
+    assert actual == [0x92, 0]
+
+
+def test_given_a_string_without_a_valid_token_result_is_negative():
+    sample = "10 STOKERMAN" + chr(13)
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == -1
+
+
+def test_given_an_input_without_a_terminated_string_result_is_negative():
+    sample = '10 PRINT"HELLO WORL' + chr(13)
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == -1
