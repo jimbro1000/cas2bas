@@ -13,8 +13,8 @@ EXPECTING_INITIAL_WHITE_SPACE = 2
 EXPECTING_TOKEN = 3
 EXPECTING_LITERAL_OR_WHITE_SPACE = 4
 EXPECTING_STRING_LITERAL = 5
-TAB = chr(8)
-EOL = chr(13)
+TAB = "\t"
+EOL = "\r"
 
 
 class DragonToken(object):
@@ -246,7 +246,11 @@ class DragonToken(object):
             elif state == EXPECTING_TOKEN:
                 outcome, token, key = build_token(next_char, token)
                 if outcome == 2:
-                    state = EXPECTING_LITERAL_OR_WHITE_SPACE
+                    token = ""
+                    if key == 0x81:
+                        state = EXPECTING_TOKEN
+                    else:
+                        state = EXPECTING_LITERAL_OR_WHITE_SPACE
                     statement.append(key)
                     next_char = plain_array.pop(0)
                 elif outcome == 1:
@@ -280,13 +284,44 @@ class DragonToken(object):
                         loop = False
                         result = -1
                     elif token == '"':
-                        statement.append(token)
-                        state = EXPECTING_STRING_LITERAL
+                        statement.append(ord(token))
+                        state = EXPECTING_LITERAL_OR_WHITE_SPACE
                         next_char = plain_array.pop(0)
                 else:
                     statement.append(ord(next_char))
                     next_char = plain_array.pop(0)
         return result, line, statement
+
+    def parse_program(self, program, load_address):
+
+        def extract_line(plain_text):
+            next_eol = plain_text.find(EOL)
+            if next_eol == -1:
+                next_line = ""
+                remaining = ""
+            else:
+                next_line = plain_text[:next_eol + 1]
+                remaining = plain_text[next_eol + 1:]
+            return next_line, remaining
+
+        def word_to_bytes(word):
+            high_byte = word // 256
+            low_byte = word % 256
+            return [high_byte, low_byte]
+
+        result = 0
+        loop = len(program) > 0
+        stream = []
+        while loop:
+            sample, program = extract_line(program)
+            result, line_number, line_stream = self.parse_line(sample)
+            if result == 0:
+                load_address += 4 + len(line_stream)
+                stream += word_to_bytes(load_address)
+                stream += word_to_bytes(int(line_number))
+                stream += line_stream
+            loop = result == 0 and len(program) > 0
+        return result, stream
 
 
 class DragonDosToken(DragonToken):

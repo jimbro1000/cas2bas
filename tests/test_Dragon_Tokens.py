@@ -129,3 +129,27 @@ def test_given_an_input_without_a_terminated_string_result_is_negative():
     sample = '10 PRINT"HELLO WORL' + chr(13)
     result, line, actual = tokeniser.parse_line(sample)
     assert result == -1
+
+
+def test_given_a_goto_statment_result_is_correctly_two_tokens():
+    sample = "10 GOTO 10" + chr(13)
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "10"
+    assert actual == [0x81, 0xbc, 0x20, 0x31, 0x30, 0]
+
+
+def test_given_a_gosub_statment_result_is_correctly_two_tokens():
+    sample = "10 GOSUB20" + chr(13)
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "10"
+    assert actual == [0x81, 0xbd, 0x32, 0x30, 0]
+
+
+def test_given_a_valid_program_build_a_token_stream():
+    load_address = 0x1E20
+    sample = '10 PRINT"HELLO WORLD";' + chr(13) + '20 GOTO 10' + chr(13)
+    result, stream = tokeniser.parse_program(sample, load_address)
+    assert result == 0
+    assert len(stream) > 0
