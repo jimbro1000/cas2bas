@@ -14,7 +14,7 @@ EXPECTING_TOKEN = 3
 EXPECTING_LITERAL_OR_WHITE_SPACE = 4
 EXPECTING_STRING_LITERAL = 5
 TAB = "\t"
-EOL = "\r"
+EOL = "\n"
 
 
 class DragonToken(object):
