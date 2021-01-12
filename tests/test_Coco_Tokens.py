@@ -1,9 +1,11 @@
 import pytest
 
 from formats import Coco_Tokens
+from formats import Coco_Rsdos_Tokens
+
 
 tokeniser = Coco_Tokens.CoCoToken()
-dos_tokeniser = Coco_Tokens.RsDosToken()
+dos_tokeniser = Coco_Rsdos_Tokens.RsDosToken()
 
 
 @pytest.fixture(autouse=True)

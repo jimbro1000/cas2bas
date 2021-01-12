@@ -1,7 +1,9 @@
 import pytest
 
-from formats.Coco_Tokens import CoCoToken, RsDosToken
-from formats.Dragon_Tokens import DragonDosToken, DragonToken
+from formats.Coco_Tokens import CoCoToken
+from formats.Coco_Rsdos_Tokens import RsDosToken
+from formats.Dragon_Dos_Tokens import DragonDosToken
+from formats.Dragon_Tokens import DragonToken
 from formats.Tokeniser_Factory import find_tokeniser
 
 

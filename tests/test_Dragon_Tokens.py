@@ -1,9 +1,11 @@
 import pytest
 
 from formats import Dragon_Tokens
+from formats import Dragon_Dos_Tokens
+
 
 tokeniser = Dragon_Tokens.DragonToken()
-dos_tokeniser = Dragon_Tokens.DragonDosToken()
+dos_tokeniser = Dragon_Dos_Tokens.DragonDosToken()
 EOL = chr(10)
 
 
