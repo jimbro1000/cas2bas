@@ -133,7 +133,7 @@ def test_given_an_input_without_a_terminated_string_result_is_negative():
     assert result == -1
 
 
-def test_given_a_goto_statment_result_is_correctly_two_tokens():
+def test_given_a_goto_statement_result_is_correctly_two_tokens():
     sample = "10 GOTO 10\n"
     result, line, actual = tokeniser.parse_line(sample)
     assert result == 0

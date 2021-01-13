@@ -11,9 +11,13 @@ EXPECTING_INITIAL_WHITE_SPACE = 2
 EXPECTING_TOKEN = 3
 EXPECTING_LITERAL_OR_WHITE_SPACE = 4
 EXPECTING_STRING_LITERAL = 5
+EXPECTING_LITERAL_TO_EOL = 6
+CLOSE_LINE = 7
 TAB = "\t"
 EOL = "\n"
 CR = "\r"
+SPACE = " "
+STRING_DELIMITER = '"'
 
 
 class EmptyToken(object):
@@ -22,8 +26,9 @@ class EmptyToken(object):
     function_token_dictionary = {}
 
     reserved_literals = [
+        SPACE,
+        STRING_DELIMITER,
         ":",
-        '"',
         CR,
         EOL
     ]
@@ -82,27 +87,50 @@ class EmptyToken(object):
                 reserved = item
         return result, reserved
 
+    def is_numeric(self, sample):
+        return "0" <= sample <= "9"
+
     def parse_line(self, plain):
         """ parse_line "assumes" that the plain input is a correctly
         constructed basic program statement """
 
         def process_line(char, line_number):
-            if '0' <= char <= '9':
+            if self.is_numeric(char):
                 line_number += char
                 return 1, line_number
             return 0, line_number
 
         def process_white_space(char):
-            if char == " " or char == TAB:
+            if char == SPACE or char == TAB:
                 return 1
             else:
                 return 0
 
         def build_token(char, sample):
+            """ on valid token for next single character return 5
+                on numeric character return 4
+                on reserved character return 3
+                on valid token match return 2
+                on no-match return 1
+                on excessively long sample return 0"""
+            is_reserved = False
+            numeric = self.is_numeric(char)
+            is_eol = char == EOL
             sample += char
+            if sample == char:
+                is_reserved, char = self.is_reserved(char)
             valid, test_key = self.match(sample)
-            if valid:
+            single_valid, single_key = self.match(char)
+            if numeric:
+                return 4, sample, None
+            if is_reserved:
+                return 3, sample, None
+            elif valid:
                 return 2, sample, test_key
+            elif single_valid:
+                return 5, sample[:-1], single_key
+            elif is_eol:
+                return 5, sample[:-1], EOL
             elif len(sample) > MAXIMUM_TOKEN_LENGTH:
                 return 0, sample, None
             else:
@@ -132,12 +160,49 @@ class EmptyToken(object):
                     next_char = plain_array.pop(0)
             elif state == EXPECTING_TOKEN:
                 outcome, token, key = build_token(next_char, token)
-                if outcome == 2:
-                    token = ""
-                    if key == 0x81:
-                        state = EXPECTING_TOKEN
+                if outcome == 5:
+                    while len(token) > 0:
+                        statement.append(ord(token[0]))
+                        token = token[1:]
+                    if key == EOL:
+                        state = CLOSE_LINE
                     else:
+                        statement.append(key)
+                        token = ""
+                        next_char = plain_array.pop(0)
+                elif outcome == 4:
+                    while len(token) > 0:
+                        statement.append(ord(token[0]))
+                        token = token[1:]
+                    token = ""
+                    next_char = plain_array.pop(0)
+                elif outcome == 3:
+                    if token == ":":
+                        statement.append(ord(token))
+                        token = ""
+                        next_char = plain_array.pop(0)
+                    elif token == EOL:
+                        state = CLOSE_LINE
+                    elif token == SPACE:
+                        statement.append(ord(token))
+                        next_char = plain_array.pop(0)
+                        token = ""
+                    elif token == STRING_DELIMITER:
+                        statement.append(ord(token))
+                        next_char = plain_array.pop(0)
+                        token = ""
+                        state = EXPECTING_STRING_LITERAL
+                elif outcome == 2:
+                    state = EXPECTING_TOKEN
+                    if token == "ELSE":
+                        statement.append(ord(":"))
+                    elif token == "REM":
+                        state = EXPECTING_LITERAL_TO_EOL
+                    elif token == "'":
+                        state = EXPECTING_LITERAL_TO_EOL
+                    elif token == "DATA":
                         state = EXPECTING_LITERAL_OR_WHITE_SPACE
+                    token = ""
                     statement.append(key)
                     next_char = plain_array.pop(0)
                 elif outcome == 1:
@@ -149,9 +214,7 @@ class EmptyToken(object):
                 reserved, token = self.is_reserved(next_char)
                 if reserved:
                     if token == EOL:
-                        statement.append(0)
-                        loop = False
-                        result = 0
+                        state = CLOSE_LINE
                     elif token == CR:
                         next_char = plain_array.pop(0)
                     elif token == ":":
@@ -172,18 +235,23 @@ class EmptyToken(object):
                     statement.append(0)
                     loop = False
                     result = -1
-                    next_char = plain_array.pop(0)
-                elif token == CR:
-                    pass
-                elif token == '"':
+                elif token == STRING_DELIMITER:
                     statement.append(ord(token))
-                    state = EXPECTING_LITERAL_OR_WHITE_SPACE
+                    state = EXPECTING_TOKEN
                     next_char = plain_array.pop(0)
-                if reserved:
-                    pass
                 else:
                     statement.append(ord(next_char))
                     next_char = plain_array.pop(0)
+            elif state == EXPECTING_LITERAL_TO_EOL:
+                if next_char == EOL:
+                    state = CLOSE_LINE
+                else:
+                    statement.append(ord(next_char))
+                    next_char = plain_array.pop(0)
+            elif state == CLOSE_LINE:
+                statement.append(0)
+                loop = False
+                result = 0
         return result, line, statement
 
     def parse_program(self, program, load_address):

@@ -1,6 +1,9 @@
 Version 2.0.0 Unreleased
 
 * Provide bas2cas command (WIP)
+* Add optional TRS80 Basic II tokens
+
+Authored by Julian Brown
 
 -----------------------------------------------------------------------------------
 

@@ -14,6 +14,7 @@ def usage():
     print("  -dd --dragondos : use DragonDos extended BASIC")
     print("  -cc --coco      : use Coco BASIC")
     print("  -rd --rsdos     : use Coco RSDos extended BASIC")
+    print("  -b2 --basic2    : use TRS80 BASIC II")
     print("If none of the token options are given, Dragon tokens are used")
     print("  -s --silent     : suppress all console output")
     print("  -q --quiet      : only show errors in console")
