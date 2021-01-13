@@ -177,3 +177,14 @@ def test_given_multiple_sublines_encode_tokens_correctly():
     assert result == 0
     assert line == "20"
     assert actual == expected
+
+
+def test_string_literal_at_end_of_subline_is_one_byte():
+    expected = [0x87, 0x22, 0x48, 0x45, 0x4c, 0x4c, 0x4f, 0x20,
+                0x57, 0x4f, 0x5a, 0x4c, 0x44, 0x22, 0x3b, 0x3a,
+                0x81, 0xba, 0x31, 0x30, 0]
+    sample = '10 PRINT"HELLO WORLD";:GOTO10\n'
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "10"
+    assert actual == expected
