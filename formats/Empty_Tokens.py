@@ -18,6 +18,7 @@ EOL = "\n"
 CR = "\r"
 SPACE = " "
 STRING_DELIMITER = '"'
+COLON = ":"
 
 
 class EmptyToken(object):
@@ -28,7 +29,7 @@ class EmptyToken(object):
     reserved_literals = [
         SPACE,
         STRING_DELIMITER,
-        ":",
+        COLON,
         CR,
         EOL
     ]
@@ -106,19 +107,30 @@ class EmptyToken(object):
             else:
                 return 0
 
+        def append_to_statement(value, statement):
+            if type(value) == str:
+                value = ord(value)
+            if value > 0xff:
+                msb = (value & 0xff00) >> 8
+                lsb = value & 0xff
+                statement.append(msb)
+                statement.append(lsb)
+            else:
+                statement.append(value)
+            return statement
+
         def build_token(char, sample):
             """ on valid token for next single character return 5
                 on numeric character return 4
                 on reserved character return 3
                 on valid token match return 2
-                on no-match return 1
-                on excessively long sample return 0"""
+                on no-match return 1"""
             is_reserved = False
             numeric = self.is_numeric(char)
-            is_eol = char == EOL
+            any_reserved, not_used = self.is_reserved(char)
             sample += char
             if sample == char:
-                is_reserved, char = self.is_reserved(char)
+                is_reserved = any_reserved
             valid, test_key = self.match(sample)
             single_valid, single_key = self.match(char)
             if numeric:
@@ -129,10 +141,8 @@ class EmptyToken(object):
                 return 2, sample, test_key
             elif single_valid:
                 return 5, sample[:-1], single_key
-            elif is_eol:
-                return 5, sample[:-1], EOL
-            elif len(sample) > MAXIMUM_TOKEN_LENGTH:
-                return 0, sample, None
+            elif any_reserved:
+                return 5, sample[:-1], char
             else:
                 return 1, sample, None
 
@@ -162,54 +172,74 @@ class EmptyToken(object):
                 outcome, token, key = build_token(next_char, token)
                 if outcome == 5:
                     while len(token) > 0:
-                        statement.append(ord(token[0]))
+                        statement = append_to_statement(
+                            token[0], statement
+                        )
+                        # statement.append(ord(token[0]))
                         token = token[1:]
-                    if key == EOL:
+                    if key == EOL or key == CR:
                         state = CLOSE_LINE
+                    elif key == COLON:
+                        statement = append_to_statement(key, statement)
+                        # statement.append(ord(key))
+                        token = ""
+                        next_char = plain_array.pop(0)
+                    elif key == STRING_DELIMITER:
+                        state = EXPECTING_STRING_LITERAL
+                        statement = append_to_statement(key, statement)
+                        # statement.append(ord(key))
+                        token = ""
+                        next_char = plain_array.pop(0)
                     else:
-                        statement.append(key)
+                        statement = append_to_statement(key, statement)
+                        # statement.append(key)
                         token = ""
                         next_char = plain_array.pop(0)
                 elif outcome == 4:
                     while len(token) > 0:
-                        statement.append(ord(token[0]))
+                        statement = append_to_statement(
+                            token[0], statement
+                        )
+                        # statement.append(ord(token[0]))
                         token = token[1:]
                     token = ""
                     next_char = plain_array.pop(0)
                 elif outcome == 3:
                     if token == ":":
-                        statement.append(ord(token))
+                        statement = append_to_statement(token, statement)
+                        # statement.append(ord(token))
                         token = ""
                         next_char = plain_array.pop(0)
-                    elif token == EOL:
+                    elif token == EOL or token == CR:
                         state = CLOSE_LINE
                     elif token == SPACE:
-                        statement.append(ord(token))
+                        statement = append_to_statement(token, statement)
+                        # statement.append(ord(token))
                         next_char = plain_array.pop(0)
                         token = ""
                     elif token == STRING_DELIMITER:
-                        statement.append(ord(token))
+                        statement = append_to_statement(token, statement)
+                        # statement.append(ord(token))
                         next_char = plain_array.pop(0)
                         token = ""
                         state = EXPECTING_STRING_LITERAL
                 elif outcome == 2:
                     state = EXPECTING_TOKEN
                     if token == "ELSE":
-                        statement.append(ord(":"))
+                        statement = append_to_statement(COLON, statement)
+                        # statement.append(ord(":"))
                     elif token == "REM":
                         state = EXPECTING_LITERAL_TO_EOL
                     elif token == "'":
                         state = EXPECTING_LITERAL_TO_EOL
                     elif token == "DATA":
-                        state = EXPECTING_LITERAL_OR_WHITE_SPACE
+                        state = EXPECTING_LITERAL_TO_EOL
                     token = ""
-                    statement.append(key)
+                    statement = append_to_statement(key, statement)
+                    # statement.append(key)
                     next_char = plain_array.pop(0)
                 elif outcome == 1:
                     next_char = plain_array.pop(0)
-                else:
-                    loop = False
-                    result = -1
             elif state == EXPECTING_LITERAL_OR_WHITE_SPACE:
                 reserved, token = self.is_reserved(next_char)
                 if reserved:
@@ -218,38 +248,48 @@ class EmptyToken(object):
                     elif token == CR:
                         next_char = plain_array.pop(0)
                     elif token == ":":
-                        statement.append(ord(token))
+                        statement = append_to_statement(token, statement)
+                        # statement.append(ord(token))
                         state = EXPECTING_TOKEN
                         next_char = plain_array.pop(0)
                         token = ""
                     elif token == '"':
-                        statement.append(ord(token))
+                        statement = append_to_statement(token, statement)
+                        # statement.append(ord(token))
                         state = EXPECTING_STRING_LITERAL
                         next_char = plain_array.pop(0)
                 else:
-                    statement.append(ord(next_char))
+                    statement = append_to_statement(next_char, statement)
+                    # statement.append(ord(next_char))
                     next_char = plain_array.pop(0)
             elif state == EXPECTING_STRING_LITERAL:
                 reserved, token = self.is_reserved(next_char)
-                if token == EOL:
-                    statement.append(0)
+                if token == EOL or token == CR:
+                    statement = append_to_statement(0, statement)
+                    # statement.append(0)
                     loop = False
                     result = -1
                 elif token == STRING_DELIMITER:
-                    statement.append(ord(token))
+                    statement = append_to_statement(token, statement)
+                    # statement.append(ord(token))
                     state = EXPECTING_TOKEN
                     next_char = plain_array.pop(0)
                 else:
-                    statement.append(ord(next_char))
+                    statement = append_to_statement(next_char, statement)
+                    # statement.append(ord(next_char))
                     next_char = plain_array.pop(0)
             elif state == EXPECTING_LITERAL_TO_EOL:
                 if next_char == EOL:
                     state = CLOSE_LINE
+                elif next_char == CR:
+                    next_char = plain_array.pop(0)
                 else:
-                    statement.append(ord(next_char))
+                    statement = append_to_statement(next_char, statement)
+                    # statement.append(ord(next_char))
                     next_char = plain_array.pop(0)
             elif state == CLOSE_LINE:
-                statement.append(0)
+                statement = append_to_statement(0, statement)
+                # statement.append(0)
                 loop = False
                 result = 0
         return result, line, statement
@@ -259,7 +299,10 @@ class EmptyToken(object):
         def extract_line(plain_text):
             next_eol = plain_text.find(EOL)
             if next_eol == -1:
-                next_line = ""
+                if len(plain_text) > 0:
+                    next_line = plain_text + EOL
+                else:
+                    next_line = ""
                 remaining = ""
             else:
                 next_line = plain_text[:next_eol + 1]
@@ -276,12 +319,12 @@ class EmptyToken(object):
         stream = []
         while loop:
             sample, program = extract_line(program)
-            print(sample)
-            result, line_number, line_stream = self.parse_line(sample)
-            if result == 0:
-                load_address += 4 + len(line_stream)
-                stream += word_to_bytes(load_address)
-                stream += word_to_bytes(int(line_number))
-                stream += line_stream
+            if len(sample) > 0:
+                result, line_number, line_stream = self.parse_line(sample)
+                if result == 0:
+                    load_address += 4 + len(line_stream)
+                    stream += word_to_bytes(load_address)
+                    stream += word_to_bytes(int(line_number))
+                    stream += line_stream
             loop = result == 0 and len(program) > 0
-        return result, stream
+        return result, bytearray(stream)

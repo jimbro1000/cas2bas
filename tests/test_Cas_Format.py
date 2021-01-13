@@ -495,7 +495,7 @@ def test_build_file_takes_filename_and_data_to_return_cas_stream():
     expected = "10 STOP\n"
     data = [0, 0, 0, 0x0A, 0x92, 0]
     actual = formatter.build_file(filename, data)
-    assert isinstance(actual, list)
+    assert isinstance(actual, bytearray)
     assert len(actual) == 292
     formatter.data = actual
     header_pass = formatter.process_header()

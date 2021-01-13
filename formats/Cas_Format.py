@@ -231,7 +231,8 @@ class CasFormat(object):
             result.append(LEADER)
         return result
 
-    def build_file(self, filename, data):
+    def build_file(self, filename, data, header_length=DEFAULT_LEADER_SIZE):
+        self.leader_length = header_length
         result = self.build_header(filename)
         loop = len(data) > 0
         block = FileBlock(DATA_BLOCK)
@@ -249,4 +250,4 @@ class CasFormat(object):
         block = FileBlock(END_OF_FILE_BLOCK)
         result += block.seal_block()
         result.append(LEADER)
-        return result
+        return bytearray(result)

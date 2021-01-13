@@ -121,12 +121,6 @@ def test_given_a_valid_line_string_build_a_tokenised_string():
     assert actual == [0x92, 0]
 
 
-def test_given_a_string_without_a_valid_token_result_is_negative():
-    sample = "10 STOKERMAN\n"
-    result, line, actual = tokeniser.parse_line(sample)
-    assert result == -1
-
-
 def test_given_an_input_without_a_terminated_string_result_is_negative():
     sample = '10 PRINT"HELLO WORL\n'
     result, line, actual = tokeniser.parse_line(sample)
@@ -163,3 +157,10 @@ def test_given_a_variable_assignment_result_is_correctly_encoded():
     assert result == 0
     assert line == "10"
     assert actual == [0x41, 0xcb, 0x42, 0xc3, 0x43, 0]
+
+
+def test_failing_scenario():
+    sample = '20 FORI=1TO12:READA$(I):NEXT:FORI=1TO7:READB$(I),BM(I):NEXT:FORI=1TO7:READC$(I):NEXT:GOSUB2020'
+    result, stream = tokeniser.parse_program(sample, 0x1E20)
+    assert result == 0
+    assert len(stream) > 0
