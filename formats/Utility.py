@@ -23,7 +23,6 @@ def find_two_part_argument(options, desired):
         index = 0
         loop = True
         while loop:
-            switch = options[index]
             if options[index] in desired:
                 result = index
                 loop = False
