@@ -1,8 +1,7 @@
 import pytest
 
-from formats import Dragon_Tokens
 from formats import Dragon_Dos_Tokens
-
+from formats import Dragon_Tokens
 
 tokeniser = Dragon_Tokens.DragonToken()
 dos_tokeniser = Dragon_Dos_Tokens.DragonDosToken()
@@ -156,3 +155,11 @@ def test_given_a_valid_program_build_a_token_stream():
     result, stream = tokeniser.parse_program(sample, load_address)
     assert result == 0
     assert len(stream) > 0
+
+
+def test_given_a_variable_assignment_result_is_correctly_encoded():
+    sample = "10 A=B+C\n"
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "10"
+    assert actual == [0x41, 0xcb, 0x42, 0xc3, 0x43, 0]

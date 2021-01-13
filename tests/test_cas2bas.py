@@ -66,4 +66,4 @@ def test_given_a_valid_file_and_tokeniser_generate_a_listing_file(mocker):
     open.assert_called_once_with("textfile", "w")
     print.assert_any_call("Located program A")
     print.assert_any_call("textfile extracted from testfile \
-using \x1b[1mDragon tokens\x1b[0m")
+using \033[1mDragon Tokens\033[0m")

@@ -52,8 +52,11 @@ class EmptyToken(object):
             else:
                 return "invalid function token"
         if byte == 255:
-            self.state = FUNCTION
-            return ""
+            if self.max_function > 0:
+                self.state = FUNCTION
+                return ""
+            else:
+                return "invalid extension token"
         if byte <= self.max_keyword:
             return self.keyword_token_dictionary.get(byte)
         else:

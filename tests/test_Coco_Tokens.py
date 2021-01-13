@@ -1,17 +1,19 @@
 import pytest
 
-from formats import Coco_Tokens
 from formats import Coco_Rsdos_Tokens
-
+from formats import Coco_Tokens
+from formats import Trs80_Tokens
 
 tokeniser = Coco_Tokens.CoCoToken()
 dos_tokeniser = Coco_Rsdos_Tokens.RsDosToken()
+basic2_tokeniser = Trs80_Tokens.Trs80Token()
 
 
 @pytest.fixture(autouse=True)
 def before_each():
     tokeniser.state = Coco_Tokens.KEYWORD
     dos_tokeniser.state = Coco_Tokens.KEYWORD
+    basic2_tokeniser.state = Trs80_Tokens.KEYWORD
 
 
 @pytest.mark.parametrize("test_input,expected",
@@ -58,6 +60,11 @@ def test_when_a_two_byte_dos_token_is_supplied_return_the_token_function(
     dos_tokeniser.convert(0xFF)
     actual = dos_tokeniser.convert(test_input)
     assert actual == expected
+
+
+def test_when_a_two_byte_basic2_token_is_supplied_return_nothing():
+    actual = basic2_tokeniser.convert(0xFF)
+    assert actual == "invalid extension token"
 
 
 @pytest.mark.parametrize("test_input,expected",
