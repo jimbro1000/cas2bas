@@ -17,45 +17,49 @@ def find_verbosity(options):
     return result
 
 
-def find_header_length(options, default):
-    result = default
+def find_two_part_argument(options, desired):
+    result = -1
     if len(options) > 0:
         index = 0
         loop = True
         while loop:
             switch = options[index]
-            index += 1
-            if switch == "-h" or switch == "--header":
-                if index <= len(options):
-                    value = options[index]
-                    if value.isnumeric():
-                        result = int(value)
-                        if 0 < result <= 65535:
-                            result = default
+            if options[index] in desired:
+                result = index
                 loop = False
-            loop = loop and index <= len(options)
+            index += 1
+            loop = loop and len(options) <= index
+    if result >= 0:
+        return True, result
+    else:
+        return False, None
+
+
+def find_header_length(options, default):
+    result = default
+    found, index = find_two_part_argument(options, ["-h", "--header"])
+    if found:
+        value = options[index + 1]
+        safe, result = string_to_number(value)
+        if safe:
+            if result <= 0 or result >= 65535:
+                result = default
+        else:
+            result = default
     return result
 
 
 def find_base_load_address(options, default):
     result = default
-    if len(options) > 0:
-        index = 0
-        loop = True
-        while loop:
-            switch = options[index]
-            index += 1
-            if switch == "-b" or switch == "--base":
-                if index <= len(options):
-                    value = options[index]
-                    safe, result = string_to_number(value)
-                    if safe:
-                        if result <= 0 or result >= 65535:
-                            result = default
-                    else:
-                        result = default
-                loop = False
-            loop = loop and index <= len(options)
+    found, index = find_two_part_argument(options, ["-b", "--base"])
+    if found:
+        value = options[index + 1]
+        safe, result = string_to_number(value)
+        if safe:
+            if result <= 0 or result >= 65535:
+                result = default
+        else:
+            result = default
     return result
 
 

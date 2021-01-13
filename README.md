@@ -70,4 +70,12 @@ The script is set to treat binary and ASCII files in the same way but this assum
 Many commercial packages, while written in basic, used a memory dump to achieve an autorun of BASIC code. If you want a
 listing of such a file you will need to load it as normal, perform a soft reset and then save the code again as a BASIC
 file
- 
+
+## Credits ##
+
+While I started out doing this on my own there have been a few helping hands along the way:
+
+* Daniel Farnand for making invest some more time in the tools and stretching the ideas
+* Mike Miller (facebook) for pointing me in the right direction to Walter K. Zydhek's work on the find detail of
+  Microsoft Color Basic
+* Ciaran Anscomb for maintaining the incredibly useful XROAR emulator
