@@ -1,7 +1,6 @@
 from formats.Dragon_Tokens import DragonToken
 from formats.Utility import invert_dictionary
 
-
 MAXIMUM_DOS_KEYWORD = 0xe7
 MAXIMUM_DOS_FUNCTION = 0xa8
 

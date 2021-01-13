@@ -1,6 +1,5 @@
-from formats.Utility import invert_dictionary
 from formats.Coco_Tokens import CoCoToken
-
+from formats.Utility import invert_dictionary
 
 MAXIMUM_DOS_KEYWORD = 0xe0
 MAXIMUM_DOS_FUNCTION = 0xa6

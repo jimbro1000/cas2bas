@@ -15,7 +15,7 @@ command
 ### How do I get set up? ###
 
 * Python interpreter (almost any version will do)
-* Either pip, [pipx](https://pipxproject.github.io/pipx/), or clone the repository to your local computer (see 
+* Either pip, [pipx](https://pipxproject.github.io/pipx/), or clone the repository to your local computer (see
   [instructions](#instructions))
 * Some suitable BASIC CAS files
 
