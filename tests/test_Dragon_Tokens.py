@@ -245,3 +245,14 @@ def test_dollar_always_means_end_of_string_variable_or_token():
     assert result == 0
     assert line == "510"
     assert actual == expected
+
+
+def test_parentheses_are_delimiters_too():
+    expected = [0x85, 0x20, 0x41, 0x53, 0xCC, 0x30, 0x20, 0xC9,
+                0x20, 0x41, 0x53, 0xCA, 0x42, 0x4D, 0x28, 0x49,
+                0x54, 0x29, 0xBF, 0x35, 0x34, 0x30, 0x00]
+    sample = '550 IF AS<0 OR AS>BM(IT)THEN540\n'
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "550"
+    assert actual == expected

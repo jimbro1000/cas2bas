@@ -13,6 +13,11 @@ EXPECTING_LITERAL_OR_WHITE_SPACE = 4
 EXPECTING_STRING_LITERAL = 5
 EXPECTING_LITERAL_TO_EOL = 6
 CLOSE_LINE = 7
+MATCH_NEXT_SINGLE_CHARACTER = 5
+MATCH_NUMERIC_CHARACTER = 4
+MATCH_RESERVED_CHARACTER = 3
+MATCH_TOKEN = 2
+NO_MATCH = 1
 TAB = "\t"
 EOL = "\n"
 CR = "\r"
@@ -22,6 +27,8 @@ COLON = ":"
 SEMICOLON = ";"
 COMMA = ","
 STRING_IDENTIFIER = "$"
+OPEN_BRACKET = "("
+CLOSE_BRACKET = ")"
 
 
 class EmptyToken(object):
@@ -131,11 +138,6 @@ class EmptyToken(object):
             return stream
 
         def build_token(char, sample):
-            """ on valid token for next single character return 5
-                on numeric character return 4
-                on reserved character return 3
-                on valid token match return 2
-                on no-match return 1"""
             is_reserved = False
             numeric = self.is_numeric(char)
             any_reserved, not_used = self.is_reserved(char)
@@ -145,17 +147,17 @@ class EmptyToken(object):
             valid, test_key = self.match(sample)
             single_valid, single_key = self.match(char)
             if numeric:
-                return 4, sample, None
+                return MATCH_NUMERIC_CHARACTER, sample, None
             if is_reserved:
-                return 3, sample, None
+                return MATCH_RESERVED_CHARACTER, sample, None
             elif valid:
-                return 2, sample, test_key
+                return MATCH_TOKEN, sample, test_key
             elif single_valid:
-                return 5, sample[:-1], single_key
+                return MATCH_NEXT_SINGLE_CHARACTER, sample[:-1], single_key
             elif any_reserved:
-                return 5, sample[:-1], char
+                return MATCH_NEXT_SINGLE_CHARACTER, sample[:-1], char
             else:
-                return 1, sample, None
+                return NO_MATCH, sample, None
 
         plain_array = list(plain)
         state = EXPECTING_LINE_NUMBER
@@ -181,7 +183,7 @@ class EmptyToken(object):
                     next_char = plain_array.pop(0)
             elif state == EXPECTING_TOKEN:
                 outcome, token, key = build_token(next_char, token)
-                if outcome == 5:
+                if outcome == MATCH_NEXT_SINGLE_CHARACTER:
                     while len(token) > 0:
                         statement = append_to_stream(
                             token[0], statement
@@ -198,7 +200,8 @@ class EmptyToken(object):
                         statement = append_to_stream(key, statement)
                         token = ""
                         next_char = plain_array.pop(0)
-                    elif key == SEMICOLON or key == COMMA:
+                    elif key == SEMICOLON \
+                            or key == COMMA:
                         statement = append_to_stream(key, statement)
                         token = ""
                         next_char = plain_array.pop(0)
@@ -206,7 +209,7 @@ class EmptyToken(object):
                         statement = append_to_stream(key, statement)
                         token = ""
                         next_char = plain_array.pop(0)
-                elif outcome == 4:
+                elif outcome == MATCH_NUMERIC_CHARACTER:
                     while len(token) > 0:
                         statement = append_to_stream(
                             token[0], statement
@@ -214,7 +217,7 @@ class EmptyToken(object):
                         token = token[1:]
                     token = ""
                     next_char = plain_array.pop(0)
-                elif outcome == 3:
+                elif outcome == MATCH_RESERVED_CHARACTER:
                     if token == COLON \
                             or token == SEMICOLON \
                             or token == COMMA:
@@ -232,7 +235,7 @@ class EmptyToken(object):
                         next_char = plain_array.pop(0)
                         token = ""
                         state = EXPECTING_STRING_LITERAL
-                elif outcome == 2:
+                elif outcome == MATCH_TOKEN:
                     state = EXPECTING_TOKEN
                     if token == "ELSE":
                         if statement[-1:][0] != ord(COLON):
@@ -246,8 +249,10 @@ class EmptyToken(object):
                     token = ""
                     statement = append_to_stream(key, statement)
                     next_char = plain_array.pop(0)
-                elif outcome == 1:
-                    if next_char == STRING_IDENTIFIER:
+                elif outcome == NO_MATCH:
+                    if next_char == STRING_IDENTIFIER \
+                            or next_char == OPEN_BRACKET \
+                            or next_char == CLOSE_BRACKET:
                         while len(token) > 0:
                             statement = append_to_stream(
                                 token[0], statement
