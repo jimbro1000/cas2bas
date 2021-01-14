@@ -10,7 +10,7 @@ abuses of the file format
 #### New Features in V2 ####
 
 An experimental version of the code that converts untokenised ASCII text to CAS format is available using the bas2cas
-command
+command. See [bas2cas](#bas2cas)
 
 ### How do I get set up? ###
 
@@ -19,11 +19,11 @@ command
   [instructions](#instructions))
 * Some suitable BASIC CAS files
 
-## Instructions
+## Instructions ##
 
 There are a few options for getting the script working.
 
-### Using pipx
+### Using pipx ###
 
 If you use [pipx](https://pipxproject.github.io/pipx/) you can run
 
@@ -33,28 +33,49 @@ after which `cas2bas` will be available as a command line program. You can use i
 
 ```cas2bas input.cas output.bas```
 
-Also see [Parameters.](#parameters)
+Also see [Parameters](#parameters).
 
-### As local script
+### As local script ###
 
 To use the script locally just run
 
 ```python cas2bas.py input.cas output.bas```
 
-Also see [Parameters.](#parameters)
+Also see [Parameters](#parameters).
 
-## Parameters
+## Parameters ##
 
 The output will be a formatted text listing of the contained BASIC code
 
 If there are any format errors in the CAS file the script will exit with an error code and description.
 
-Optionally you can provide a `-dd` or `--dragondos` switch after the filename to use the DragonDos extended BASIC tokens
+  `-dd --dragondos` uses Dragon and DragonDos tokens
 
-For CoCo files use a `-cc` or `--coco` switch for regular basic or use `-rd` or
-`--rsdos` for CoCo extended basic with rsdos
+  `-cc --coco` uses CoCo instead of Dragon tokens
 
-## Running Tests ###
+  `-rd --rsdos` uses CoCo and RsDos tokens
+
+Additionally the earlier Basic II tokens can be used (this is an experimental feature)
+
+  `-b2 --basic2` uses the Trs80 Basic II tokens instead of Dragon tokens
+
+for example:
+```
+cas2bas input.cas output.bas --coco
+```
+will attempt to convert the contents of input.cas to output.bas using the CoCo color basic tokens
+
+### Reporting ###
+
+By default the converter will confirm the operation and outcome but this can be modified
+
+  `-q --quiet` will reduce output to just errors
+
+  `-s --silent` will supress all console output
+
+  `-v --verbose` will increase console output to include all activity
+
+## Running Tests ##
 
 Install libraries from pip using ```pip install -r requirements.txt```
 
@@ -70,6 +91,27 @@ The script is set to treat binary and ASCII files in the same way but this assum
 Many commercial packages, while written in basic, used a memory dump to achieve an autorun of BASIC code. If you want a
 listing of such a file you will need to load it as normal, perform a soft reset and then save the code again as a BASIC
 file
+
+## bas2cas ##
+
+A new feature in version 2 is the ability to reverse the conversion process and turn plain text BASIC code into the
+tokenised format held in .cas files.
+
+Operation of the bas2cas command is essentially the same as the cas2bas command with the input being plain text (bas)
+and the output being cassette format (cas).
+
+### bas2cas parameters ###
+
+Control parameters are the same with a few additions:
+
+  `-h --header xx` will set the length of cassette file header to the following value. 
+  By default the length is set at 128 bytes. Valid values are 1 to 65535.
+
+  `-b --base xx` modifies the base address of the code. By default the base address is `0x1e00`. Any 16 bit value is 
+  accepted but validity will depend on the target hardware. The supplied value can be decimal or hexadecimal using the 
+  0x prefix.
+
+In both cases values outside of the accepted ranges will be rejected and the default used instead.
 
 ## Credits ##
 
