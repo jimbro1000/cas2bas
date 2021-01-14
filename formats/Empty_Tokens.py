@@ -273,6 +273,7 @@ class EmptyToken(object):
                     statement = append_to_statement(token, statement)
                     # statement.append(ord(token))
                     state = EXPECTING_TOKEN
+                    token = ""
                     next_char = plain_array.pop(0)
                 else:
                     statement = append_to_statement(next_char, statement)
