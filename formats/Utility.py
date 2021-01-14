@@ -41,7 +41,7 @@ def find_header_length(options, default):
         value = options[index + 1]
         safe, result = string_to_number(value)
         if safe:
-            if result <= 0 or result >= 65535:
+            if result <= 1 or result >= 65535:
                 result = default
         else:
             result = default
