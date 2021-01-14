@@ -198,3 +198,15 @@ def test_dont_add_extra_colon_before_else_if_not_needed():
     assert result == 0
     assert line == "300"
     assert actual == expected
+
+
+def test_semicolon_resets_token_search():
+    expected = [0x87, 0x40, 0x36, 0x34, 0x2C, 0x22, 0x58, 0x20,
+                0x43, 0x4F, 0x2D, 0x4F, 0x52, 0x44, 0x22, 0x3B,
+                0xFF, 0x8C, 0x28, 0x33, 0x32, 0x32, 0x36, 0x36,
+                0x29, 0x00]
+    sample = '310 PRINT@64,"X CO-ORD";PEEK(32266)\n'
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "310"
+    assert actual == expected

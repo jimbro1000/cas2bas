@@ -19,6 +19,7 @@ CR = "\r"
 SPACE = " "
 STRING_DELIMITER = '"'
 COLON = ":"
+SEMICOLON = ";"
 
 
 class EmptyToken(object):
@@ -31,7 +32,8 @@ class EmptyToken(object):
         STRING_DELIMITER,
         COLON,
         CR,
-        EOL
+        EOL,
+        SEMICOLON
     ]
 
     def __init__(self):
@@ -193,6 +195,10 @@ class EmptyToken(object):
                         statement = append_to_stream(key, statement)
                         token = ""
                         next_char = plain_array.pop(0)
+                    elif key == SEMICOLON:
+                        statement = append_to_stream(key, statement)
+                        token = ""
+                        next_char = plain_array.pop(0)
                     else:
                         statement = append_to_stream(key, statement)
                         token = ""
@@ -206,7 +212,7 @@ class EmptyToken(object):
                     token = ""
                     next_char = plain_array.pop(0)
                 elif outcome == 3:
-                    if token == ":":
+                    if token == COLON or token == SEMICOLON:
                         statement = append_to_stream(token, statement)
                         token = ""
                         next_char = plain_array.pop(0)
@@ -302,6 +308,7 @@ class EmptyToken(object):
         result = 0
         loop = len(program) > 0
         stream = []
+        load_address += 1
         while loop:
             sample, program = extract_line(program)
             if len(sample) > 0:
