@@ -188,3 +188,13 @@ def test_string_literal_at_end_of_subline_is_one_byte():
     assert result == 0
     assert line == "10"
     assert actual == expected
+
+
+def test_dont_add_extra_colon_before_else_if_not_needed():
+    expected = [0x85, 0x41, 0x53, 0x20, 0xBF, 0x31, 0x38, 0x30,
+                0x3A, 0x84, 0x31, 0x30, 0x30, 0x00]
+    sample = "300 IFAS THEN180:ELSE100\n"
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "300"
+    assert actual == expected

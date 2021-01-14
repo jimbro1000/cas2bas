@@ -226,7 +226,8 @@ class EmptyToken(object):
                 elif outcome == 2:
                     state = EXPECTING_TOKEN
                     if token == "ELSE":
-                        statement = append_to_statement(COLON, statement)
+                        if statement[-1:][0] != ord(COLON):
+                            statement = append_to_statement(COLON, statement)
                         # statement.append(ord(":"))
                     elif token == "REM":
                         state = EXPECTING_LITERAL_TO_EOL
