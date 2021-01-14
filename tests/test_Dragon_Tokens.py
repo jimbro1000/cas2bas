@@ -233,3 +233,15 @@ def test_comma_resets_token_search():
     assert result == 0
     assert line == "380"
     assert actual == expected
+
+
+def test_dollar_always_means_end_of_string_variable_or_token():
+    expected = [0x85, 0xFF, 0x96, 0x28, 0x42, 0x24, 0x28, 0x49,
+                0x29, 0x2C, 0x31, 0x29, 0xCB, 0x41, 0x53, 0x24,
+                0xBF, 0x49, 0x54, 0xCB, 0x49, 0x3A, 0x49, 0xCB,
+                0x31, 0x30, 0x00]
+    sample = '510 IFLEFT$(B$(I),1)=AS$THENIT=I:I=10\n'
+    result, line, actual = tokeniser.parse_line(sample)
+    assert result == 0
+    assert line == "510"
+    assert actual == expected

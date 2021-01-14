@@ -21,6 +21,7 @@ STRING_DELIMITER = '"'
 COLON = ":"
 SEMICOLON = ";"
 COMMA = ","
+STRING_IDENTIFIER = "$"
 
 
 class EmptyToken(object):
@@ -246,6 +247,13 @@ class EmptyToken(object):
                     statement = append_to_stream(key, statement)
                     next_char = plain_array.pop(0)
                 elif outcome == 1:
+                    if next_char == STRING_IDENTIFIER:
+                        while len(token) > 0:
+                            statement = append_to_stream(
+                                token[0], statement
+                            )
+                            token = token[1:]
+                        token = ""
                     next_char = plain_array.pop(0)
             elif state == EXPECTING_LITERAL_OR_WHITE_SPACE:
                 reserved, token = self.is_reserved(next_char)
