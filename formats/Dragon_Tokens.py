@@ -1,13 +1,15 @@
+from formats.Empty_Tokens import EmptyToken
+from formats.Utility import invert_dictionary
+
 KEYWORD = 0
 FUNCTION = 1
 MAXIMUM_KEYWORD = 0xcd
 MAXIMUM_FUNCTION = 0xa1
-MAXIMUM_DOS_KEYWORD = 0xe7
-MAXIMUM_DOS_FUNCTION = 0xa8
 
 
-class DragonToken(object):
-    """Converts byte codes into tokens, or more accurately detokenises a byte stream one byte at a time."""
+class DragonToken(EmptyToken):
+    """Converts byte codes into tokens, or more accurately de-tokenises
+    a byte stream one byte at a time."""
     keyword_token_dictionary = {
         0x80: "FOR",
         0x81: "GO",
@@ -127,78 +129,11 @@ class DragonToken(object):
     }
 
     def __init__(self):
-        self.state = KEYWORD
+        super().__init__()
         self.max_keyword = MAXIMUM_KEYWORD
         self.max_function = MAXIMUM_FUNCTION
-        self.name = "Dragon tokens"
-
-    def convert(self, byte):
-        """Translates a byte to a string. Ascii characters are literal, values over 127 are tokens or token sequences.
-        Not all token values are valid."""
-        if byte < 128:
-            return chr(byte)
-        if self.state == FUNCTION:
-            if byte <= self.max_function:
-                function = self.function_token_dictionary.get(byte)
-                self.state = KEYWORD
-                return function
-            else:
-                return "invalid function token"
-        if byte == 255:
-            self.state = FUNCTION
-            return ""
-        if byte <= self.max_keyword:
-            return self.keyword_token_dictionary.get(byte)
-        else:
-            return "invalid keyword token"
-
-
-class DragonDosToken(DragonToken):
-    dos_keyword_token_dictionary = {
-        0xce: "AUTO",
-        0xcf: "BACKUP",
-        0xd0: "BEEP",
-        0xd1: "BOOT",
-        0xd2: "CHAIN",
-        0xd3: "COPY",
-        0xd4: "CREATE",
-        0xd5: "DIR",
-        0xd6: "DRIVE",
-        0xd7: "DSKINIT",
-        0xd8: "FREAD",
-        0xd9: "FWRITE",
-        0xda: "ERROR",
-        0xdb: "KILL",
-        0xdc: "LOAD",
-        0xdd: "MERGE",
-        0xde: "PROTECT",
-        0xdf: "WAIT",
-        0xe0: "RENAME",
-        0xe1: "SAVE",
-        0xe2: "SREAD",
-        0xe3: "SWRITE",
-        0xe4: "VERIFY",
-        0xe5: "FROM",
-        0xe6: "FLREAD",
-        0xe7: "SWAP"
-    }
-
-    dos_function_token_dictionary = {
-        0xa2: "LOF",
-        0xa3: "FREE",
-        0xa4: "ERL",
-        0xa5: "ERR",
-        0xa6: "HIMEM",
-        0xa7: "LOC",
-        0xa8: "FRE$"
-    }
-
-    def __init__(self):
-        super().__init__()
-        self.keyword_token_dictionary = {**self.keyword_token_dictionary,
-                                         **self.dos_keyword_token_dictionary}
-        self.function_token_dictionary = {**self.function_token_dictionary,
-                                          **self.dos_function_token_dictionary}
-        self.max_keyword = MAXIMUM_DOS_KEYWORD
-        self.max_function = MAXIMUM_DOS_FUNCTION
-        self.name = "DragonDos extended tokens"
+        self.name = "Dragon Tokens"
+        self.keyword_dictionary = invert_dictionary(
+            self.keyword_token_dictionary)
+        self.function_dictionary = invert_dictionary(
+            self.function_token_dictionary)
