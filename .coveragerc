@@ -1,0 +1,4 @@
+[run]
+omit =
+  /cas2bas/Main.py
+  /bas2cas/Main.py
