@@ -20,6 +20,7 @@ SPACE = " "
 STRING_DELIMITER = '"'
 COLON = ":"
 SEMICOLON = ";"
+COMMA = ","
 
 
 class EmptyToken(object):
@@ -33,7 +34,8 @@ class EmptyToken(object):
         COLON,
         CR,
         EOL,
-        SEMICOLON
+        SEMICOLON,
+        COMMA
     ]
 
     def __init__(self):
@@ -195,7 +197,7 @@ class EmptyToken(object):
                         statement = append_to_stream(key, statement)
                         token = ""
                         next_char = plain_array.pop(0)
-                    elif key == SEMICOLON:
+                    elif key == SEMICOLON or key == COMMA:
                         statement = append_to_stream(key, statement)
                         token = ""
                         next_char = plain_array.pop(0)
@@ -212,7 +214,9 @@ class EmptyToken(object):
                     token = ""
                     next_char = plain_array.pop(0)
                 elif outcome == 3:
-                    if token == COLON or token == SEMICOLON:
+                    if token == COLON \
+                            or token == SEMICOLON \
+                            or token == COMMA:
                         statement = append_to_stream(token, statement)
                         token = ""
                         next_char = plain_array.pop(0)
