@@ -338,4 +338,5 @@ class EmptyToken(object):
                     stream += [msb, lsb]
                     stream += line_bytes
             loop = result == 0 and len(program) > 0
+        stream += [0, 0]
         return result, bytearray(stream)

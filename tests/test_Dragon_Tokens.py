@@ -256,3 +256,11 @@ def test_parentheses_are_delimiters_too():
     assert result == 0
     assert line == "550"
     assert actual == expected
+
+
+def test_end_of_program_needs_double_null():
+    expected = bytearray(b'\x1e\x0b\x00\n\x81\xbc 10\x00\x00\x00')
+    sample = "10 GOTO 10\n"
+    result, actual = tokeniser.parse_program(sample, 0x1e00)
+    assert result == 0
+    assert actual == expected
