@@ -7,7 +7,7 @@ from formats.Utility import find_verbosity
 
 def usage():
     print("Dragon CAS format to BASIC listing")
-    print("Version 2.0.0")
+    print("Version 2.0.1")
     print("Usage:")
     print("  cas2bas [input_filename] [output_filename] [options] ")
     print("Options:")

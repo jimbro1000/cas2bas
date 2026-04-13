@@ -11,7 +11,7 @@ HEADER_LENGTH = 128
 
 def usage():
     print("Dragon ASCII BASIC listing to CAS format")
-    print("Version 2.0.0")
+    print("Version 2.0.1")
     print("Usage:")
     print(
         "bas2cas [input_filename] [output_filename] [cassette_filename] ["
