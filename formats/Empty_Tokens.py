@@ -127,7 +127,7 @@ class EmptyToken(object):
                 return 0
 
         def append_to_stream(value, stream):
-            if type(value) == str:
+            if isinstance(value, str):
                 value = ord(value)
             if value > 0xff:
                 msb, lsb = self.word_to_bytes(value)
