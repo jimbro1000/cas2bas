@@ -49,6 +49,8 @@ The output will be a formatted text listing of the contained BASIC code
 
 If there are any format errors in the CAS file the script will exit with an error code and description.
 
+  `-p [program_name]` extracts the named program instead of the first program
+
   `-dd --dragondos` uses Dragon and DragonDos tokens
 
   `-cc --coco` uses CoCo instead of Dragon tokens
@@ -117,7 +119,7 @@ In both cases values outside of the accepted ranges will be rejected and the def
 
 While I started out doing this on my own there have been a few helping hands along the way:
 
-* Daniel Farnand for making invest some more time in the tools and stretching the ideas
+* Daniel Farnand for making me invest some more time in the tools and stretching the ideas
 * Mike Miller (facebook) for pointing me in the right direction to Walter K. Zydhek's work on the find detail of
   Microsoft Color Basic
 * Ciaran Anscomb for maintaining the incredibly useful XROAR emulator
