@@ -1,6 +1,24 @@
-Version 2.0.0 Unreleased
+Version 2.1.0 
 
-* Provide bas2cas command (WIP)
+Version 2.1.0 24th November 2026
+
+* Extract named program from CAS file using -p option
+
+Authored by Julian Brown
+
+-----------------------------------------------------------------------------------
+
+Version 2.0.1 13th April 2026
+
+* Update code and dependencies
+
+Authored by Julian Brown
+
+-----------------------------------------------------------------------------------
+
+Version 2.0.0 14th January 2021
+
+* Provide bas2cas command
 * Add optional TRS80 Basic II tokens
 
 Authored by Julian Brown
