@@ -241,7 +241,7 @@ def test_given_a_truncated_file_returns_an_error_and_halts():
         with pytest.raises(SystemExit) as pytest_wrapped_exception:
             formatter.process_file()
     assert pytest_wrapped_exception.type == SystemExit
-    assert pytest_wrapped_exception.value.code == -1
+    assert pytest_wrapped_exception.value.code == 1
 
 
 def test_given_a_byte_array_without_a_name_block_returns_an_error():

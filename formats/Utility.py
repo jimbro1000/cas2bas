@@ -27,11 +27,18 @@ def find_two_part_argument(options, desired):
                 result = index
                 loop = False
             index += 1
-            loop = loop and len(options) <= index
+            loop = loop and index < len(options)
     if result >= 0:
         return True, result
     else:
         return False, None
+
+
+def find_program_name(options):
+    found, index = find_two_part_argument(options, ["-p"])
+    if found and index + 1 < len(options):
+        return options[index + 1]
+    return None
 
 
 def find_header_length(options, default):

@@ -50,3 +50,15 @@ def test_not_given_any_verbosity_options_find_verbosity_sets_to_normal(
     opts = [test_input]
     actual = find_verbosity(opts)
     assert actual == 1
+
+
+def test_find_program_name_returns_value_after_p_option():
+    from formats.Utility import find_program_name
+    assert find_program_name(["-q", "-p", "GAME"]) == "GAME"
+
+
+def test_find_program_name_returns_none_when_absent_or_missing_value():
+    from formats.Utility import find_program_name
+    assert find_program_name([]) is None
+    assert find_program_name(["-q"]) is None
+    assert find_program_name(["-q", "-p"]) is None

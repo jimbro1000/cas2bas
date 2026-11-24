@@ -2,7 +2,7 @@ import sys
 
 from formats.Cas_Format import CasFormat
 from formats.Tokeniser_Factory import find_tokeniser
-from formats.Utility import find_verbosity
+from formats.Utility import find_verbosity, find_program_name
 
 
 def usage():
@@ -11,14 +11,15 @@ def usage():
     print("Usage:")
     print("  cas2bas [input_filename] [output_filename] [options] ")
     print("Options:")
-    print("  -dd --dragondos : use DragonDos extended BASIC")
-    print("  -cc --coco      : use Coco BASIC")
-    print("  -rd --rsdos     : use Coco RSDos extended BASIC")
-    print("  -b2 --basic2    : use TRS80 BASIC II")
+    print("  -p [program_name] : extract named program from CAS file")
+    print("  -dd --dragondos   : use DragonDos extended BASIC")
+    print("  -cc --coco        : use Coco BASIC")
+    print("  -rd --rsdos       : use Coco RSDos extended BASIC")
+    print("  -b2 --basic2      : use TRS80 BASIC II")
     print("If none of the token options are given, Dragon tokens are used")
-    print("  -s --silent     : suppress all console output")
-    print("  -q --quiet      : only show errors in console")
-    print("  -v --verbose    : show all messages")
+    print("  -s --silent       : suppress all console output")
+    print("  -q --quiet        : only show errors in console")
+    print("  -v --verbose      : show all messages")
     print("Default messages are informational only")
 
 
@@ -35,6 +36,7 @@ class Main(object):
         self.verbosity = 1
         self.filename = ""
         self.output = ""
+        self.program = None
 
     def run(self) -> object:
         # Process parameters
@@ -45,6 +47,7 @@ class Main(object):
         self.output = sys.argv[2]
         tokeniser = find_tokeniser(sys.argv[3:])
         self.verbosity = find_verbosity(sys.argv[3:])
+        self.program = find_program_name(sys.argv[3:])
         self.report(0, f"Using {tokeniser.name}")
         formatter = initialise_formatter(
             self.filename, tokeniser, self.verbosity
@@ -52,7 +55,10 @@ class Main(object):
         self.process_cas(formatter)
 
     def process_cas(self, formatter):
-        header = formatter.process_header()
+        if self.program is None:
+            header = formatter.process_header()
+        else:
+            header = self.find_program(formatter)
         # Process the code
         if header == 0:
             self.report(1, f"Located program {formatter.file_name}")
@@ -68,10 +74,33 @@ using \033[1m{formatter.tokeniser.name}\033[0m"
                 )
             else:
                 self.report(2, "Processing file failed")
-                raise Exception
+                sys.exit(1)
         else:
             self.report(2, "Processing header failed")
-            raise Exception
+            sys.exit(1)
+
+    def find_program(self, formatter):
+        """Skips segments in the stream until the named program is found.
+        Segments that are not basic listings are skipped unless they are
+        the named program. Returns 0 with the formatter positioned at the
+        program data, or -1 if the program is not present, is not a basic
+        listing or the stream is invalid."""
+        wanted = self.program.replace(" ", "")[:8]
+        while True:
+            header = formatter.process_header(report_errors=False)
+            if formatter.header_end is None:
+                # could not locate a name block at all
+                self.report(2, formatter.header_error)
+                return -1
+            if formatter.file_name == wanted:
+                if header != 0:
+                    self.report(2, formatter.header_error)
+                return header
+            self.report(1, f"Skipped program {formatter.file_name}")
+            if formatter.skip_file() != 0 or not formatter.has_next_file():
+                self.report(2, f"Program {self.program} not found")
+                return -1
+            formatter.reset_file()
 
     def report(self, level, message):
         if level >= self.verbosity:

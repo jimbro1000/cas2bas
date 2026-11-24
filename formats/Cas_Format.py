@@ -46,6 +46,8 @@ class CasFormat(object):
         self.load_address = 0
         self.verbosity = verbosity
         self.leader_length = DEFAULT_LEADER_SIZE
+        self.header_error = None
+        self.header_end = None
 
     def next_byte(self):
         """Provides the next byte from the loaded byte array.
@@ -57,26 +59,36 @@ class CasFormat(object):
         else:
             self.report(2, "file length exceeded (" + str(self.byte_index) +
                         " of " + str(len(self.data)) + ")")
-            sys.exit(-1)
+            sys.exit(1)
 
-    def process_header(self):
+    def header_failure(self, message, report_errors):
+        """Records (and optionally reports) why the header was rejected."""
+        self.header_error = message
+        if report_errors:
+            self.report(2, message)
+        return -1
+
+    def process_header(self, report_errors=True):
         """Processes the file header to verify file type and find file
-        data start point."""
+        data start point. When report_errors is False any failure is only
+        recorded in header_error."""
+        self.header_error = None
+        self.header_end = None
         head = self.next_byte()
         leader_length = 0
         while head == LEADER:
             leader_length += 1
             head = self.next_byte()
         if head != SYNC:
-            self.report(2,
-                        "unknown file type, invalid sync byte: " + str(head))
-            return -1
+            return self.header_failure(
+                "unknown file type, invalid sync byte: " + str(head),
+                report_errors)
         head = self.next_byte()
         if head != NAME_FILE_BLOCK:
-            self.report(2, "illegal file type")
-            return -1
-        self.next_byte()
-        # header length - don't need it
+            return self.header_failure("illegal file type", report_errors)
+        length = self.next_byte()
+        # header length - used to skip a header that is not processed
+        self.header_end = self.byte_index + length + 1
         # self.next_byte()
         # this byte is unidentified
         head = self.next_byte()
@@ -88,18 +100,17 @@ class CasFormat(object):
             name_index += 1
         # file id  byte
         if head != BASIC_FILE_IDENTIFIER:
-            self.report(2, "not a basic listing")
-            return -1
+            return self.header_failure("not a basic listing", report_errors)
         head = self.next_byte()
         # ascii flag
         if head != ASCII_FILE_FLAG and head != BINARY_FILE_FLAG:
-            self.report(2, "not a valid byte format - must be ascii or binary")
-            return -1
+            return self.header_failure(
+                "not a valid byte format - must be ascii or binary",
+                report_errors)
         head = self.next_byte()
         # gap flag
         if head != CONTINUOUS_FILE:
-            self.report(2, "not a continuous file")
-            return -1
+            return self.header_failure("not a continuous file", report_errors)
         head = self.next_byte()
         # exec address
         self.exec_address = head
@@ -114,6 +125,56 @@ class CasFormat(object):
         # this byte is the checksum of the block (bytes+type+length)
         self.state = EXPECTING_LINE_ADDRESS_HIGH
         return 0
+
+    def reset_file(self):
+        """Clears per-program state ready to read the next program."""
+        self.state = -1
+        self.file_name = ""
+        self.current_line = ""
+        self.listing = []
+        self.line_number = 0
+        self.next_line = 0
+        self.exec_address = 0
+        self.load_address = 0
+        self.header_error = None
+        self.header_end = None
+
+    def has_next_file(self):
+        """Advances to the next leader in the stream, returns True if
+        a further file (leader followed by sync) is present."""
+        size = len(self.data)
+        while self.byte_index < size and self.data[self.byte_index] != LEADER:
+            self.byte_index += 1
+        look_ahead = self.byte_index
+        while look_ahead < size and self.data[look_ahead] == LEADER:
+            look_ahead += 1
+        return look_ahead < size and self.data[look_ahead] == SYNC
+
+    def skip_file(self):
+        """Skips over the blocks of the current program, up to and
+        including the end of file block, without processing content."""
+        # move past any part of the header left unread by a rejection
+        if self.header_end is not None and self.byte_index < self.header_end:
+            self.byte_index = min(self.header_end, len(self.data))
+        while True:
+            head = self.next_byte()
+            while head == LEADER:
+                head = self.next_byte()
+            if head != SYNC:
+                self.report(2,
+                            "unknown file type, invalid sync byte: " +
+                            str(head))
+                return -1
+            head = self.next_byte()
+            if head == END_OF_FILE_BLOCK:
+                return 0
+            if head != DATA_BLOCK:
+                self.report(2, "invalid block type: " + str(head))
+                return -1
+            length = self.next_byte()
+            # skip block content plus checksum
+            for _ in range(length + 1):
+                self.next_byte()
 
     def process_file(self):
         """Processes the file body to extract the token stream.
