@@ -115,6 +115,65 @@ Control parameters are the same with a few additions:
 
 In both cases values outside of the accepted ranges will be rejected and the default used instead.
 
+## CAS File Format ##
+
+From [WorldOfDragon](http://www.archive.worldofdragon.org/index.php?title=Tape%5CDisk_Preservation#CAS_File_Format)
+
+The CAS file format was originally created for the PC-Dragon emulator and is one way of representing programs or data stored on Dragon cassette tapes. The CAS file format comes in two flavours, the most usual and default format is modelled after how the Dragon actually stores data on cassettes, optionally with truncated leader bytes to minimise the file size. The alternate format is simply the RAW bit stream and was only used for games that did not conform to the standard tape format (an early form of copy protection).
+
+The standard Dragon tape format is:
+
+1. A leader block of $55 multiplied by the 16 bit number in location $90:91 (default 128). 
+2. A namefile block. 
+3. A blank section of tape for processing of the namefile block. 
+4. Another leader block of $90:91 bytes of $55 
+5. One or more data blocks. 
+6. An end-of-file block.
+
+A header block, data block or EOF file block consists of:
+
+1. A leader byte - $55 
+2. A sync byte - $3C 
+3. A block type byte:
+
+                     00=namefile block
+                     01=data block
+                     FF=end-of-file block
+4. A block length byte (0-255)
+
+5. 0-255 bytes of data. For a namefile block this consists of:
+```
+    5.1 An 8 byte program name
+    5.2 A file ID byte where:
+        00=BASIC program
+        01=Data file
+        02=Binary file
+    5.3 An ASCII flag where:
+        00=Binary file
+        FF=ASCII file
+    5.4 A gap flag to indicate whether the
+        data stream is continuous (00) as
+        in binary or BASIC files, or in blocks
+        where the tape keeps stopping (FF) as
+        in data files.
+    5.5 Two bytes for the default EXEC address
+        of a binary file.
+    5.6 Two bytes for the default load address
+        of a binary file.
+```
+For a data block, this consists of the actual data to load/save and there is no data associated with an EOF block.
+
+6. A checksum byte which is: sum of all the data bytes + block type + block length.
+
+7. A trailer byte - $55
+
+
+The first byte of a CAS file must be $55 for identification purposes. The first block of a standard format CAS file should be a namefile block, and the last block is usually an EOF block. Some games used copy protection where the number of blocks to be loaded did not match the number specified in the file header and a fake EOF block was included so that a simple copy of the file would result in a truncated file (other similar mechanisms skipped blocks or used non-standard block types).
+
+Note that standard format CAS files may omit leaders. If leaders are required, use the FIXCAS utility to add leaders to more closely resemble the true Dragon cassette tape format. Since the standard format CAS file is a fairly simple representation of the data stream read from a tape after demodulation and decoding of the audio signals, certain properties of cassette tapes cannot be reproduced, e.g. gaps of silence (at least one game loader uses this as a copy protection mechanism that needs the RAW format of CAS to work - although this doesn't store silence it does store noise in those gaps).
+
+The above description makes it pretty easy to create CAS files. Reading CAS files can be a bit more difficult though. Data is actually represented as a stream of bits on cassette tapes, and the Dragon uses different audio signals to represent different bit values. When decoding such an audio signal into a bit stream and creating a CAS file, the structure described above might not align to byte boundaries in the CAS file (this can occur when using DC, although DCWIN does synchronise bitstream conversions to byte boundaries). Especially the leader may not be decoded to an integral number of bytes. To make matters even worse, both leaders and sync bytes may contain noise and still be readable. A robust CAS file reader must take this into account.
+
 ## Credits ##
 
 While I started out doing this on my own there have been a few helping hands along the way:
