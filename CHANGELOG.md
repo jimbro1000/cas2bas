@@ -1,4 +1,12 @@
-Version 2.1.0 
+Version 2.2.0 
+
+Version 2.2.0 25th November 2026
+
+* Extract a binary (machine code) file instead of a BASIC listing using -b option
+
+Authored by Julian Brown
+
+-----------------------------------------------------------------------------------
 
 Version 2.1.0 24th November 2026
 

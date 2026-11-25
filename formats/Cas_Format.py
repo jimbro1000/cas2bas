@@ -68,9 +68,11 @@ class CasFormat(object):
             self.report(2, message)
         return -1
 
-    def process_header(self, report_errors=True):
+    def process_header(self, report_errors=True,
+                       file_id=BASIC_FILE_IDENTIFIER):
         """Processes the file header to verify file type and find file
-        data start point. When report_errors is False any failure is only
+        data start point. file_id is the expected file type (basic or
+        binary). When report_errors is False any failure is only
         recorded in header_error."""
         self.header_error = None
         self.header_end = None
@@ -99,8 +101,12 @@ class CasFormat(object):
             head = self.next_byte()
             name_index += 1
         # file id  byte
-        if head != BASIC_FILE_IDENTIFIER:
-            return self.header_failure("not a basic listing", report_errors)
+        if head != file_id:
+            if file_id == BINARY_FILE_IDENTIFIER:
+                message = "not a binary file"
+            else:
+                message = "not a basic listing"
+            return self.header_failure(message, report_errors)
         head = self.next_byte()
         # ascii flag
         if head != ASCII_FILE_FLAG and head != BINARY_FILE_FLAG:
@@ -153,6 +159,25 @@ class CasFormat(object):
     def skip_file(self):
         """Skips over the blocks of the current program, up to and
         including the end of file block, without processing content."""
+        return self.read_blocks(None)
+
+    def process_binary(self):
+        """Extracts the current program as binary data. The result starts
+        with the exec address and load address (high byte first) followed
+        by the contents of all data blocks as one contiguous stream.
+        Returns -1 if the block structure is invalid."""
+        data = bytearray()
+        if self.read_blocks(data) != 0:
+            return -1
+        addresses = bytearray([
+            self.exec_address // 256, self.exec_address % 256,
+            self.load_address // 256, self.load_address % 256])
+        return bytes(addresses + data)
+
+    def read_blocks(self, collect):
+        """Reads the blocks of the current program up to and including
+        the end of file block. Data block contents are appended to
+        collect unless it is None."""
         # move past any part of the header left unread by a rejection
         if self.header_end is not None and self.byte_index < self.header_end:
             self.byte_index = min(self.header_end, len(self.data))
@@ -172,9 +197,12 @@ class CasFormat(object):
                 self.report(2, "invalid block type: " + str(head))
                 return -1
             length = self.next_byte()
-            # skip block content plus checksum
-            for _ in range(length + 1):
-                self.next_byte()
+            for _ in range(length):
+                value = self.next_byte()
+                if collect is not None:
+                    collect.append(value)
+            # checksum byte
+            self.next_byte()
 
     def process_file(self):
         """Processes the file body to extract the token stream.

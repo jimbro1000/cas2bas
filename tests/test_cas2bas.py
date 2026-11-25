@@ -64,7 +64,9 @@ def test_given_a_valid_file_and_tokeniser_generate_a_listing_file(mocker):
     subject = cas2bas.Main.Main()
     subject.filename = "testfile"
     subject.output = "textfile"
-    subject.process_cas(formatter)
+    with pytest.raises(SystemExit) as exit_info:
+        subject.process_cas(formatter)
+    assert exit_info.value.code == 0
     open.assert_called_once_with("textfile", "w")
     print.assert_any_call("Located program A")
     print.assert_any_call("textfile extracted from testfile \
@@ -164,7 +166,9 @@ def test_given_a_program_name_skip_other_programs_and_extract_it(mocker):
     subject.filename = "testfile"
     subject.output = "textfile"
     subject.program = "B"
-    subject.process_cas(formatter)
+    with pytest.raises(SystemExit) as exit_info:
+        subject.process_cas(formatter)
+    assert exit_info.value.code == 0
     open.assert_called_once_with("textfile", "w")
     print.assert_any_call("Skipped program A")
     print.assert_any_call("Located program B")
@@ -209,13 +213,15 @@ def test_given_a_program_name_not_in_file_report_not_found(mocker):
     print.assert_any_call("Program B not found")
 
 
-def build_segment(name, file_id, data_blocks):
+def build_segment(name, file_id, data_blocks, exec_address=0,
+                  load_address=0):
     """Builds a cas segment with a full length header block"""
     cas = formats.Cas_Format
     padded = [ord(c) for c in name.ljust(8)]
     segment = [cas.LEADER, cas.SYNC, cas.NAME_FILE_BLOCK, 15] + padded + \
         [file_id, cas.BINARY_FILE_FLAG, cas.CONTINUOUS_FILE,
-         0, 0, 0, 0, 0]
+         exec_address // 256, exec_address % 256,
+         load_address // 256, load_address % 256, 0]
     for block in data_blocks:
         segment += [cas.LEADER, cas.LEADER, cas.SYNC, cas.DATA_BLOCK,
                     len(block)] + block + [0]
@@ -238,7 +244,9 @@ def test_given_a_program_name_skip_segments_that_are_not_basic(mocker):
     subject.filename = "testfile"
     subject.output = "textfile"
     subject.program = "B"
-    subject.process_cas(formatter)
+    with pytest.raises(SystemExit) as exit_info:
+        subject.process_cas(formatter)
+    assert exit_info.value.code == 0
     open.assert_called_once_with("textfile", "w")
     print.assert_any_call("Skipped program M")
     print.assert_any_call("Located program B")
@@ -271,15 +279,67 @@ def test_given_binary_flag_is_set_extract_binary_block_instead_of_reporting_erro
     mocker.patch("builtins.print")
     stream = build_segment(
         "A", formats.Cas_Format.BINARY_FILE_IDENTIFIER,
-        [[0,0,0x17,0xFF,0x1E,0x00,0x0D],[1,2,3,4,5,6,7,8,9]])
+        [[0,0,0x17,0xFF,0x1E,0x00,0x0D],[1,2,3,4,5,6,7,8,9]],
+        exec_address=0x3F00, load_address=0x3E00)
     formatter = formats.Cas_Format.CasFormat(stream, DragonToken(), 1)
     subject = cas2bas.Main.Main()
     subject.filename = "testfile"
     subject.output = "textfile"
+    subject.binary = True
     with pytest.raises(SystemExit) as exit_info:
         subject.process_cas(formatter)
     assert exit_info.value.code == 0
-    open.assert_called_once_with("textfile", "w")
+    open.assert_called_once_with("textfile", "wb")
+    assert subject.result == bytes(
+        [0x3F, 0x00, 0x3E, 0x00,
+         0, 0, 0x17, 0xFF, 0x1E, 0x00, 0x0D,
+         1, 2, 3, 4, 5, 6, 7, 8, 9])
     print.assert_any_call("Located program A")
-    print.assert_any_call("textfile extracted from testfile \
-using \033[1mDragon Tokens\033[0m")
+    print.assert_any_call("textfile extracted from testfile")
+    assert not any("Dragon Tokens" in str(call)
+                   for call in print.call_args_list)
+
+
+def test_given_binary_flag_and_program_name_skip_to_named_binary(mocker):
+    mocker.patch("builtins.open")
+    mocker.patch("builtins.print")
+    stream = build_segment(
+        "B", formats.Cas_Format.BASIC_FILE_IDENTIFIER,
+        [[0, 0, 0, 0x0A, 0x92, 0]]) + \
+        build_segment(
+            "M", formats.Cas_Format.BINARY_FILE_IDENTIFIER,
+            [[1, 2, 3], [4, 5]], exec_address=0x1234, load_address=0x5678)
+    formatter = formats.Cas_Format.CasFormat(stream, DragonToken(), 1)
+    subject = cas2bas.Main.Main()
+    subject.filename = "testfile"
+    subject.output = "binfile"
+    subject.program = "M"
+    subject.binary = True
+    with pytest.raises(SystemExit) as exit_info:
+        subject.process_cas(formatter)
+    assert exit_info.value.code == 0
+    open.assert_called_once_with("binfile", "wb")
+    print.assert_any_call("Skipped program B")
+    print.assert_any_call("Located program M")
+    assert subject.result == bytes(
+        [0x12, 0x34, 0x56, 0x78, 1, 2, 3, 4, 5])
+
+
+def test_given_binary_flag_and_program_name_that_is_basic_report_error(
+        mocker):
+    mocker.patch("builtins.open")
+    mocker.patch("builtins.print")
+    stream = build_segment(
+        "B", formats.Cas_Format.BASIC_FILE_IDENTIFIER,
+        [[0, 0, 0, 0x0A, 0x92, 0]])
+    formatter = formats.Cas_Format.CasFormat(stream, DragonToken(), 1)
+    subject = cas2bas.Main.Main()
+    subject.filename = "testfile"
+    subject.output = "binfile"
+    subject.program = "B"
+    subject.binary = True
+    with pytest.raises(SystemExit) as exit_info:
+        subject.process_cas(formatter)
+    assert exit_info.value.code == 1
+    open.assert_not_called()
+    print.assert_any_call("not a binary file")

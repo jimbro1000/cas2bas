@@ -1,8 +1,10 @@
 import sys
 
-from formats.Cas_Format import CasFormat
+from formats.Cas_Format import CasFormat, BASIC_FILE_IDENTIFIER, \
+    BINARY_FILE_IDENTIFIER
 from formats.Tokeniser_Factory import find_tokeniser
-from formats.Utility import find_verbosity, find_program_name
+from formats.Utility import find_verbosity, find_program_name, \
+    find_binary_flag
 
 
 def usage():
@@ -50,30 +52,43 @@ class Main(object):
         tokeniser = find_tokeniser(sys.argv[3:])
         self.verbosity = find_verbosity(sys.argv[3:])
         self.program = find_program_name(sys.argv[3:])
+        self.binary = find_binary_flag(sys.argv[3:])
         self.report(0, f"Using {tokeniser.name}")
         formatter = initialise_formatter(
             self.filename, tokeniser, self.verbosity
         )
         self.process_cas(formatter)
 
+    def file_id(self):
+        """The file type being extracted, binary if the flag is set."""
+        if self.binary:
+            return BINARY_FILE_IDENTIFIER
+        return BASIC_FILE_IDENTIFIER
+
     def process_cas(self, formatter):
         if self.program is None:
-            header = formatter.process_header()
+            header = formatter.process_header(file_id=self.file_id())
         else:
             header = self.find_program(formatter)
         # Process the code
         if header == 0:
             self.report(1, f"Located program {formatter.file_name}")
-            self.result = formatter.process_file()
-            # Only try to write if string was actually produced
-            if isinstance(self.result, str):
-                with open(self.output, "w") as f:
+            if self.binary:
+                self.result = formatter.process_binary()
+                result_type, mode = bytes, "wb"
+            else:
+                self.result = formatter.process_file()
+                result_type, mode = str, "w"
+            # Only try to write if a result was actually produced
+            if isinstance(self.result, result_type):
+                with open(self.output, mode) as f:
                     f.write(self.result)
-                self.report(
-                    1,
-                    f"{self.output} extracted from {self.filename} \
-using \033[1m{formatter.tokeniser.name}\033[0m"
-                )
+                message = f"{self.output} extracted from {self.filename}"
+                if not self.binary:
+                    message += \
+                        f" using \033[1m{formatter.tokeniser.name}\033[0m"
+                self.report(1, message)
+                sys.exit(0)
             else:
                 self.report(2, "Processing file failed")
                 sys.exit(1)
@@ -83,13 +98,14 @@ using \033[1m{formatter.tokeniser.name}\033[0m"
 
     def find_program(self, formatter):
         """Skips segments in the stream until the named program is found.
-        Segments that are not basic listings are skipped unless they are
-        the named program. Returns 0 with the formatter positioned at the
-        program data, or -1 if the program is not present, is not a basic
-        listing or the stream is invalid."""
+        Segments of other types are skipped unless they are the named
+        program. Returns 0 with the formatter positioned at the program
+        data, or -1 if the program is not present, is not of the type
+        being extracted (basic or binary) or the stream is invalid."""
         wanted = self.program.replace(" ", "")[:8]
         while True:
-            header = formatter.process_header(report_errors=False)
+            header = formatter.process_header(
+                report_errors=False, file_id=self.file_id())
             if formatter.header_end is None:
                 # could not locate a name block at all
                 self.report(2, formatter.header_error)

@@ -45,11 +45,13 @@ Also see [Parameters](#parameters).
 
 ## Parameters ##
 
-The output will be a formatted text listing of the contained BASIC code
+The output will be a formatted text listing of the contained BASIC code, or the raw contents of a binary file if `-b` is used
 
 If there are any format errors in the CAS file the script will exit with an error code and description.
 
   `-p [program_name]` extracts the named program instead of the first program
+
+  `-b --binary` extracts a binary (machine code) file instead of a BASIC listing
 
   `-dd --dragondos` uses Dragon and DragonDos tokens
 
@@ -66,6 +68,22 @@ for example:
 cas2bas input.cas output.bas --coco
 ```
 will attempt to convert the contents of input.cas to output.bas using the CoCo color basic tokens
+
+### Binary Files ###
+
+When `-b` is given the program must be a binary file (file ID 02 in the namefile block), otherwise the converter exits with an error. Other programs in the CAS file are skipped when `-p` is used to name the binary file.
+
+The output file is written as raw bytes:
+
+1. Two bytes for the EXEC address (high byte first)
+2. Two bytes for the load address (high byte first)
+3. The contents of all data blocks as a single contiguous stream
+
+for example:
+```
+cas2bas input.cas output.bin -b -p GAME
+```
+will extract the binary file GAME from input.cas to output.bin
 
 ### Reporting ###
 
