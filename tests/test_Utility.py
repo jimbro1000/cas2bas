@@ -1,6 +1,6 @@
 import pytest
 
-from formats.Utility import invert_dictionary, find_verbosity
+from formats.Utility import invert_dictionary, find_verbosity, find_binary_flag
 
 
 def test_given_an_empty_dictionary_invert_dictionary_returns_empty():
@@ -51,6 +51,19 @@ def test_not_given_any_verbosity_options_find_verbosity_sets_to_normal(
     actual = find_verbosity(opts)
     assert actual == 1
 
+
+@pytest.mark.parametrize("test_input", ["-b", "--binary"])
+def test_evaluate_true_for_binary_flag(test_input):
+    opts = [test_input]
+    actual = find_binary_flag(opts)
+    assert actual == True
+
+
+@pytest.mark.parametrize("test_input", ["--silent", "-q", ""])
+def test_evaluate_false_for_binary_flag(test_input):
+    opts = [test_input]
+    actual = find_binary_flag(opts)
+    assert actual == False
 
 def test_find_program_name_returns_value_after_p_option():
     from formats.Utility import find_program_name

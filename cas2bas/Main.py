@@ -12,6 +12,7 @@ def usage():
     print("  cas2bas [input_filename] [output_filename] [options] ")
     print("Options:")
     print("  -p [program_name] : extract named program from CAS file")
+    print("  -b  --binary      : extract a binary file")
     print("  -dd --dragondos   : use DragonDos extended BASIC")
     print("  -cc --coco        : use Coco BASIC")
     print("  -rd --rsdos       : use Coco RSDos extended BASIC")
@@ -37,6 +38,7 @@ class Main(object):
         self.filename = ""
         self.output = ""
         self.program = None
+        self.binary = False
 
     def run(self) -> object:
         # Process parameters

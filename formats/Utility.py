@@ -17,6 +17,14 @@ def find_verbosity(options):
     return result
 
 
+def find_binary_flag(options):
+    result = False
+    if len(options) > 0:
+        if any([op in ["-b", "--binary"] for op in options]):
+            result = True
+    return result
+
+
 def find_two_part_argument(options, desired):
     result = -1
     if len(options) > 0:

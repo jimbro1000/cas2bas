@@ -245,7 +245,7 @@ def test_given_a_program_name_skip_segments_that_are_not_basic(mocker):
     assert subject.result == "10 STOP\n"
 
 
-def test_given_a_program_name_that_is_not_basic_report_error(mocker):
+def test_given_a_program_name_that_is_not_basic_and_binary_flag_not_set_report_error(mocker):
     mocker.patch("builtins.open")
     mocker.patch("builtins.print")
     stream = build_segment(
@@ -264,3 +264,22 @@ def test_given_a_program_name_that_is_not_basic_report_error(mocker):
     open.assert_not_called()
     print.assert_any_call("Skipped program B")
     print.assert_any_call("not a basic listing")
+
+
+def test_given_binary_flag_is_set_extract_binary_block_instead_of_reporting_error(mocker):
+    mocker.patch("builtins.open")
+    mocker.patch("builtins.print")
+    stream = build_segment(
+        "A", formats.Cas_Format.BINARY_FILE_IDENTIFIER,
+        [[0,0,0x17,0xFF,0x1E,0x00,0x0D],[1,2,3,4,5,6,7,8,9]])
+    formatter = formats.Cas_Format.CasFormat(stream, DragonToken(), 1)
+    subject = cas2bas.Main.Main()
+    subject.filename = "testfile"
+    subject.output = "textfile"
+    with pytest.raises(SystemExit) as exit_info:
+        subject.process_cas(formatter)
+    assert exit_info.value.code == 0
+    open.assert_called_once_with("textfile", "w")
+    print.assert_any_call("Located program A")
+    print.assert_any_call("textfile extracted from testfile \
+using \033[1mDragon Tokens\033[0m")
