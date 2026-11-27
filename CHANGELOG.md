@@ -1,4 +1,12 @@
-Version 2.2.0 
+Current Version 2.2.1 
+
+Version 2.2.1 27th November 2026
+
+* Fix file segment names to be upper case
+
+Authored by Julian Brown
+
+-----------------------------------------------------------------------------------
 
 Version 2.2.0 25th November 2026
 
