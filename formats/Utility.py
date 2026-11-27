@@ -45,7 +45,7 @@ def find_two_part_argument(options, desired):
 def find_program_name(options):
     found, index = find_two_part_argument(options, ["-p"])
     if found and index + 1 < len(options):
-        return options[index + 1]
+        return options[index + 1].upper()
     return None
 
 

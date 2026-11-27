@@ -11,7 +11,7 @@ HEADER_LENGTH = 128
 
 def usage():
     print("Dragon ASCII BASIC listing to CAS format")
-    print("Version 2.0.1")
+    print("Version 2.2.1")
     print("Usage:")
     print(
         "bas2cas [input_filename] [output_filename] [cassette_filename] ["
@@ -44,7 +44,7 @@ class Main(object):
             return
         filename = sys.argv[1]
         output = sys.argv[2]
-        coded_filename = sys.argv[3]
+        coded_filename = sys.argv[3].upper()
         tokeniser = find_tokeniser(sys.argv[4:])
         self.verbosity = find_verbosity(sys.argv[4:])
         load_address = find_base_load_address(sys.argv[4:], LOAD_ADDRESS)

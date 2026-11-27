@@ -10,7 +10,7 @@ with io.open(os.path.join(CURDIR, "README.md"), "r", encoding="utf-8") as f:
 
 setup(
     name='cas2bas',
-    version='2.2.0',
+    version='2.2.1',
     author='Julian Brown',
     author_email='julian@the-lair.info',
     packages=[

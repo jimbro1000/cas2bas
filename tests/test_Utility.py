@@ -70,6 +70,11 @@ def test_find_program_name_returns_value_after_p_option():
     assert find_program_name(["-q", "-p", "GAME"]) == "GAME"
 
 
+def test_find_program_name_returns_value_as_upper_case():
+    from formats.Utility import find_program_name
+    assert find_program_name(["-q", "-p", "work"]) == "WORK"
+
+
 def test_find_program_name_returns_none_when_absent_or_missing_value():
     from formats.Utility import find_program_name
     assert find_program_name([]) is None
